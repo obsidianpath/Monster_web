@@ -2,3234 +2,1068 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Монстрик — Хранитель Тишины</title>
-
+<title>Монстрик-Хранитель Тишины</title>
 <style>
-/* =========================================================
-   MONSTER CLASSROOM
-   Полностью автономная страница
-   ========================================================= */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-:root {
-    --bg-top: #172b58;
-    --bg-mid: #4778a9;
-    --bg-bottom: #9dd6d7;
-
-    --glass: rgba(255,255,255,.14);
-    --glass-border: rgba(255,255,255,.28);
-
-    --green: #5ee37d;
-    --yellow: #ffd95a;
-    --orange: #ff9f43;
-    --red: #ff5b61;
-
-    --text: #fff;
-    --dark: #16233d;
-}
-
-html,
-body {
-    width: 100%;
+  html, body {
     height: 100%;
     overflow: hidden;
-}
-
-body {
-    font-family:
-        "Trebuchet MS",
-        "Segoe UI",
-        Arial,
-        sans-serif;
-
-    color: var(--text);
-
-    background:
-        radial-gradient(circle at 50% 25%, rgba(255,255,255,.12), transparent 30%),
-        linear-gradient(
-            180deg,
-            var(--bg-top) 0%,
-            var(--bg-mid) 55%,
-            var(--bg-bottom) 100%
-        );
-
-    transition:
-        background 1s ease,
-        filter 1s ease;
-
-    position: relative;
-}
-
-/* =========================================================
-   BACKGROUND
-   ========================================================= */
-
-.background-glow {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.background-glow::before,
-.background-glow::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    opacity: .25;
-}
-
-.background-glow::before {
-    width: 450px;
-    height: 450px;
-    background: #9cecff;
-    top: -180px;
-    left: -100px;
-}
-
-.background-glow::after {
-    width: 500px;
-    height: 500px;
-    background: #a8ffb7;
-    right: -150px;
-    bottom: -200px;
-}
-
-body.awake {
-    background:
-        radial-gradient(circle at 50% 30%, rgba(255,80,80,.15), transparent 35%),
-        linear-gradient(
-            180deg,
-            #351d47 0%,
-            #8e3850 55%,
-            #d87969 100%
-        );
-}
-
-.stars {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: .65;
-
-    background-image:
-        radial-gradient(2px 2px at 10% 15%, white, transparent),
-        radial-gradient(2px 2px at 25% 40%, white, transparent),
-        radial-gradient(1px 1px at 42% 18%, white, transparent),
-        radial-gradient(2px 2px at 65% 25%, white, transparent),
-        radial-gradient(1px 1px at 80% 12%, white, transparent),
-        radial-gradient(2px 2px at 90% 48%, white, transparent),
-        radial-gradient(1px 1px at 15% 70%, white, transparent),
-        radial-gradient(2px 2px at 70% 78%, white, transparent),
-        radial-gradient(1px 1px at 48% 85%, white, transparent);
-
-    animation: starsMove 7s ease-in-out infinite alternate;
-}
-
-@keyframes starsMove {
-    from {
-        opacity: .35;
-        transform: translateY(0);
-    }
-
-    to {
-        opacity: .75;
-        transform: translateY(-5px);
-    }
-}
-
-/* =========================================================
-   TOP BAR
-   ========================================================= */
-
-.topbar {
-    position: fixed;
-    top: 18px;
-    left: 20px;
-    right: 20px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    z-index: 30;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 10px 17px;
-
-    background: rgba(10,25,55,.28);
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 18px;
-
-    backdrop-filter: blur(12px);
-}
-
-.logo-icon {
-    width: 42px;
-    height: 42px;
-
-    border-radius: 14px;
-
-    display: grid;
-    place-items: center;
-
-    font-size: 25px;
-
-    background:
-        linear-gradient(145deg, #7df28f, #32b85c);
-
-    box-shadow:
-        inset 0 3px 8px rgba(255,255,255,.45),
-        0 7px 20px rgba(0,0,0,.2);
-}
-
-.logo-text strong {
-    display: block;
-    font-size: 16px;
-}
-
-.logo-text span {
-    font-size: 11px;
-    opacity: .7;
-}
-
-.settings-btn {
-    width: 48px;
-    height: 48px;
-
-    border: 1px solid rgba(255,255,255,.3);
-    border-radius: 16px;
-
-    background: rgba(10,25,55,.28);
-    color: white;
-
-    font-size: 23px;
-    cursor: pointer;
-
-    backdrop-filter: blur(12px);
-
-    transition: .25s;
-}
-
-.settings-btn:hover {
-    transform: rotate(25deg) scale(1.06);
-    background: rgba(255,255,255,.2);
-}
-
-/* =========================================================
-   MAIN LAYOUT
-   ========================================================= */
-
-.app {
-    width: min(1450px, 100%);
-    height: 100%;
-
-    margin: auto;
-
-    display: grid;
-    grid-template-columns: 270px minmax(450px, 1fr) 270px;
-    gap: 25px;
-
-    align-items: center;
-
-    padding: 85px 30px 30px;
-
-    position: relative;
-    z-index: 5;
-}
-
-/* =========================================================
-   GLASS PANELS
-   ========================================================= */
-
-.panel {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.17),
-            rgba(255,255,255,.07)
-        );
-
-    border: 1px solid rgba(255,255,255,.23);
-
-    border-radius: 28px;
-
-    backdrop-filter: blur(18px);
-
-    box-shadow:
-        0 25px 60px rgba(8,25,60,.18),
-        inset 0 1px 0 rgba(255,255,255,.25);
-}
-
-/* =========================================================
-   LEFT PANEL
-   ========================================================= */
-
-.left-panel {
-    padding: 25px;
-}
-
-.left-panel h1 {
-    font-size: 25px;
-    line-height: 1.05;
-    margin-bottom: 12px;
-}
-
-.left-panel h1 span {
-    color: #ffe16a;
-}
-
-.description {
-    font-size: 13px;
-    line-height: 1.55;
-    opacity: .8;
-    margin-bottom: 24px;
-}
-
-.mission {
-    padding: 15px;
-    border-radius: 18px;
-
-    background: rgba(0,0,0,.13);
-
-    margin-bottom: 18px;
-}
-
-.mission-title {
-    font-size: 12px;
-    opacity: .65;
-    margin-bottom: 7px;
-}
-
-.mission-main {
-    font-size: 17px;
-    font-weight: bold;
-}
-
-.mission-progress {
-    height: 8px;
-    margin-top: 12px;
-
-    background: rgba(255,255,255,.15);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.mission-progress-fill {
-    height: 100%;
-    width: 0%;
-
-    background: linear-gradient(
-        90deg,
-        #63e883,
-        #d9f15b
-    );
-
-    border-radius: inherit;
-
-    transition: width .4s ease;
-}
-
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-
-    padding: 13px 0;
-
-    border-bottom: 1px solid rgba(255,255,255,.1);
-}
-
-.stat-row:last-child {
-    border-bottom: none;
-}
-
-.stat-label {
-    font-size: 12px;
-    opacity: .65;
-}
-
-.stat-value {
-    font-size: 17px;
-    font-weight: bold;
-    color: #ffe16a;
-}
-
-/* =========================================================
-   MONSTER AREA
-   ========================================================= */
-
-.monster-area {
-    min-width: 0;
-
+    font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+    user-select: none;
+  }
+
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #3a1e6e 0%, #1a0f3d 60%, #0a0520 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
+    transition: background 1.2s ease;
     position: relative;
-}
+  }
 
-/* speech bubble */
+  body.awake {
+    background: radial-gradient(ellipse at 50% 30%, #6b1010 0%, #3a0505 60%, #150000 100%);
+  }
 
-.speech {
-    min-width: 270px;
-    max-width: 400px;
+  /* Звёзды + магические частицы на фоне */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(2px 2px at 60% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 80% 20%, #fff, transparent),
+      radial-gradient(2px 2px at 35% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 10% 60%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 45% 15%, #cbb4ff, transparent),
+      radial-gradient(1.5px 1.5px at 75% 85%, #cbb4ff, transparent);
+    opacity: 0.75;
+    animation: twinkle 4s infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: 0.4 } to { opacity: 0.95 } }
 
-    padding: 14px 24px;
+  /* Красная пульсирующая вспышка по краям */
+  .rage-vignette {
+    position: fixed; inset: 0; pointer-events: none;
+    box-shadow: inset 0 0 200px rgba(255,0,0,0);
+    transition: box-shadow 0.6s ease;
+    z-index: 3;
+  }
+  body.awake .rage-vignette {
+    box-shadow: inset 0 0 220px rgba(255,0,0,0.65);
+    animation: ragePulse 1.1s ease-in-out infinite;
+  }
+  @keyframes ragePulse {
+    0%,100% { box-shadow: inset 0 0 160px rgba(255,0,0,0.5); }
+    50%     { box-shadow: inset 0 0 280px rgba(255,0,0,0.9); }
+  }
 
-    text-align: center;
-
-    border-radius: 22px;
-
-    background: rgba(255,255,255,.93);
-    color: #243252;
-
-    font-size: 17px;
-    font-weight: bold;
-
-    box-shadow:
-        0 12px 30px rgba(0,0,0,.18);
-
+  .stage {
     position: relative;
-    z-index: 10;
-
-    margin-bottom: 15px;
-
-    transition: .3s;
-}
-
-.speech::after {
-    content: "";
-
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-top: 14px solid rgba(255,255,255,.93);
-}
-
-/* =========================================================
-   MONSTER
-   ========================================================= */
-
-.monster-wrapper {
-    width: 430px;
-    height: 470px;
-
-    position: relative;
-
+    z-index: 2;
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
 
-    animation: monsterFloat 4s ease-in-out infinite;
-}
+  /* ====== МОНСТРИК (SVG) ====== */
+  .monster {
+    position: relative;
+    width: 460px;
+    height: 520px;
+    animation: breathe 3.5s ease-in-out infinite;
+    filter: drop-shadow(0 25px 35px rgba(0,0,0,0.55));
+    transition: filter 0.8s ease;
+  }
+  @keyframes breathe {
+    0%,100% { transform: translateY(0) scale(1); }
+    50%     { transform: translateY(-12px) scale(1.03); }
+  }
+  .monster.awake {
+    animation: rageShake 0.25s ease-in-out infinite;
+    filter: drop-shadow(0 25px 45px rgba(255,60,60,0.85));
+  }
+  @keyframes rageShake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    20%     { transform: translate(-8px,-4px) rotate(-2.5deg); }
+    40%     { transform: translate(7px,-7px) rotate(2.5deg); }
+    60%     { transform: translate(-6px,-3px) rotate(-2deg); }
+    80%     { transform: translate(8px,-5px) rotate(3deg); }
+  }
 
-@keyframes monsterFloat {
-    0%, 100% {
-        transform: translateY(0);
-    }
+  .monster svg { width: 100%; height: 100%; overflow: visible; }
 
-    50% {
-        transform: translateY(-8px);
-    }
-}
+  /* Плавные переходы между состояниями внутри SVG */
+  .body-gradient-stop-1 { transition: stop-color 0.8s ease; }
+  .body-gradient-stop-2 { transition: stop-color 0.8s ease; }
+  .body-gradient-stop-3 { transition: stop-color 0.8s ease; }
+  .horn-fill           { transition: fill 0.8s ease; }
+  .paw-fill            { transition: fill 0.8s ease; }
 
-/* shadow */
+  /* Зрачок */
+  .pupil-group { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .monster.awake .pupil-group { transform: translateY(6px) scale(0.55); }
 
-.monster-shadow {
+  /* Веко */
+  .eyelid { transform: translateY(-85px); transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
+  .monster.awake .eyelid { transform: translateY(0); }
+
+  /* Рот: улыбка во сне, оскал при злости */
+  .mouth-sleep { transition: opacity 0.4s ease; }
+  .mouth-rage  { opacity: 0; transition: opacity 0.4s ease; }
+  .monster.awake .mouth-sleep { opacity: 0; }
+  .monster.awake .mouth-rage  { opacity: 1; }
+
+  /* Брови */
+  .brow-group { opacity: 0; transition: opacity 0.35s ease; }
+  .monster.awake .brow-group { opacity: 1; }
+
+  /* Zzz */
+  .zzz {
     position: absolute;
-
-    bottom: 15px;
-
-    width: 290px;
-    height: 45px;
-
-    border-radius: 50%;
-
-    background: rgba(5,20,40,.3);
-
-    filter: blur(12px);
-
-    transition: .5s;
-}
-
-/* body */
-
-.monster-body {
-    width: 330px;
-    height: 350px;
-
-    position: absolute;
-    bottom: 45px;
-
-    border-radius:
-        48% 48% 42% 42% /
-        55% 55% 45% 45%;
-
-    background:
-        radial-gradient(
-            circle at 30% 22%,
-            #d4ff9e 0%,
-            #92ee6c 14%,
-            #4fca65 45%,
-            #27964d 72%,
-            #146c3b 100%
-        );
-
-    box-shadow:
-        inset 25px 25px 45px rgba(255,255,255,.28),
-        inset -25px -30px 50px rgba(0,0,0,.28),
-        0 30px 50px rgba(0,0,0,.25);
-
-    transition: .7s;
-}
-
-/* fur-ish highlights */
-
-.monster-body::before {
-    content: "";
-
-    position: absolute;
-    inset: 20px;
-
-    border-radius: inherit;
-
-    background:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.18) 0 5px, transparent 6px),
-        radial-gradient(circle at 75% 18%, rgba(255,255,255,.13) 0 7px, transparent 8px),
-        radial-gradient(circle at 82% 62%, rgba(255,255,255,.12) 0 5px, transparent 6px),
-        radial-gradient(circle at 25% 75%, rgba(255,255,255,.1) 0 8px, transparent 9px);
-
-    opacity: .9;
-}
-
-/* spots */
-
-.spot {
-    position: absolute;
-
-    border-radius: 50%;
-
-    background: rgba(23,113,61,.28);
-
-    box-shadow:
-        inset 4px 4px 8px rgba(0,0,0,.12);
-}
-
-.spot.s1 {
-    width: 40px;
-    height: 40px;
-    left: 32px;
-    top: 65px;
-}
-
-.spot.s2 {
-    width: 23px;
-    height: 23px;
-    left: 72px;
-    top: 150px;
-}
-
-.spot.s3 {
-    width: 52px;
-    height: 52px;
-    right: 30px;
-    top: 85px;
-}
-
-.spot.s4 {
-    width: 28px;
-    height: 28px;
-    right: 75px;
-    bottom: 80px;
-}
-
-.spot.s5 {
-    width: 35px;
-    height: 35px;
-    left: 45px;
-    bottom: 95px;
-}
-
-/* horns */
-
-.horn {
-    position: absolute;
-
-    top: 0;
-
-    width: 65px;
-    height: 100px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #fff1b0,
-            #e9b86b 55%,
-            #b8793f
-        );
-
-    clip-path: polygon(
-        50% 0,
-        78% 34%,
-        100% 100%,
-        50% 82%,
-        0 100%,
-        22% 34%
-    );
-
-    filter:
-        drop-shadow(0 7px 8px rgba(0,0,0,.2));
-
-    z-index: 4;
-
-    transition: .5s;
-}
-
-.horn.left {
-    left: 75px;
-    transform: rotate(-18deg);
-}
-
-.horn.right {
-    right: 75px;
-    transform: rotate(18deg);
-}
-
-/* eyes */
-
-.eye {
-    position: absolute;
-
-    z-index: 8;
-
-    top: 62px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: 165px;
-    height: 165px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle at 35% 30%,
-            white,
-            #edf5eb 60%,
-            #d1dfd0 100%
-        );
-
-    border: 8px solid #174b2b;
-
-    box-shadow:
-        inset 0 -12px 20px rgba(0,0,0,.12),
-        0 12px 20px rgba(0,0,0,.2);
-
-    overflow: hidden;
-
-    transition: .5s;
-}
-
-/* iris */
-
-.iris {
-    position: absolute;
-
-    width: 84px;
-    height: 84px;
-
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50%,-50%);
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #0b2818 0 24%,
-            #39a956 25% 48%,
-            #15743b 49% 72%,
-            #082d19 73% 100%
-        );
-
-    box-shadow:
-        0 0 0 5px rgba(34,100,49,.25);
-
-    transition: .3s;
-}
-
-/* pupil */
-
-.pupil {
-    position: absolute;
-
-    width: 38px;
-    height: 38px;
-
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50%,-50%);
-
-    background: #050805;
-
-    border-radius: 50%;
-}
-
-.pupil::before {
-    content: "";
-
-    position: absolute;
-
-    width: 15px;
-    height: 15px;
-
-    top: 7px;
-    left: 8px;
-
-    border-radius: 50%;
-
-    background: white;
-
-    opacity: .9;
-}
-
-/* eyelid */
-
-.eyelid {
-    position: absolute;
-
-    inset: -2px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #59ce69,
-            #258e4b
-        );
-
-    border-radius: 50%;
-
-    transform: translateY(-96%);
-
-    transition: .6s;
-
-    z-index: 10;
-}
-
-/* sleepy eyelid */
-
-.sleepy .eyelid {
-    transform: translateY(-55%);
-}
-
-.sleepy .iris {
-    transform:
-        translate(-50%,-50%)
-        scale(.8);
-}
-
-/* eyebrows */
-
-.brow {
-    position: absolute;
-
-    top: 42px;
-
-    width: 65px;
-    height: 13px;
-
-    border-radius: 20px;
-
-    background: #15512b;
-
-    opacity: 0;
-
-    z-index: 12;
-
-    transition: .3s;
-}
-
-.brow.left {
-    left: 38px;
-    transform: rotate(18deg);
-}
-
-.brow.right {
-    right: 38px;
-    transform: rotate(-18deg);
-}
-
-/* mouth */
-
-.mouth {
-    position: absolute;
-
-    z-index: 10;
-
-    bottom: 62px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: 100px;
-    height: 40px;
-
-    border-radius:
-        10px 10px 55px 55px;
-
-    background: #123c25;
-
-    box-shadow:
-        inset 0 8px 12px rgba(0,0,0,.3);
-
-    transition: .4s;
-
-    overflow: hidden;
-}
-
-/* teeth */
-
-.teeth {
-    display: flex;
-
-    justify-content: center;
-
-    gap: 5px;
-
-    opacity: 0;
-
-    transition: .3s;
-}
-
-.tooth {
-    width: 0;
-    height: 0;
-
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    border-top: 17px solid white;
-}
-
-/* feet */
-
-.foot {
-    position: absolute;
-
-    bottom: 28px;
-
-    width: 100px;
-    height: 58px;
-
-    border-radius: 50%;
-
-    background:
-        linear-gradient(
-            145deg,
-            #57c969,
-            #197743
-        );
-
-    box-shadow:
-        inset 8px 8px 12px rgba(255,255,255,.15),
-        inset -8px -8px 12px rgba(0,0,0,.2);
-}
-
-.foot.left {
-    left: 55px;
-}
-
-.foot.right {
-    right: 55px;
-}
-
-/* =========================================================
-   HAPPY STATE
-   ========================================================= */
-
-.monster.happy .monster-body {
-    background:
-        radial-gradient(
-            circle at 30% 22%,
-            #e1ffb2,
-            #9cf46e 20%,
-            #53d66a 55%,
-            #208f49 100%
-        );
-}
-
-.monster.happy .eyelid {
-    transform: translateY(-115%);
-}
-
-.monster.happy .mouth {
-    width: 115px;
-    height: 48px;
-    border-radius: 10px 10px 70px 70px;
-}
-
-.monster.happy .monster-shadow {
-    width: 260px;
-}
-
-/* =========================================================
-   AWAKE STATE
-   ========================================================= */
-
-.monster.awake {
-    animation:
-        monsterAngry .18s infinite alternate;
-}
-
-@keyframes monsterAngry {
-    from {
-        transform: translateX(-4px) rotate(-1deg);
-    }
-
-    to {
-        transform: translateX(4px) rotate(1deg);
-    }
-}
-
-body.awake .monster-body {
-    background:
-        radial-gradient(
-            circle at 30% 22%,
-            #ffd4a0,
-            #ff8a66 18%,
-            #e74b52 55%,
-            #8c263d 100%
-        );
-
-    box-shadow:
-        inset 25px 25px 45px rgba(255,255,255,.2),
-        inset -25px -30px 50px rgba(0,0,0,.35),
-        0 30px 50px rgba(0,0,0,.3);
-}
-
-.monster.awake .horn {
-    filter:
-        drop-shadow(0 0 12px rgba(255,80,80,.7));
-}
-
-.monster.awake .brow {
-    opacity: 1;
-    background: #571d25;
-}
-
-.monster.awake .eyelid {
-    transform: translateY(-120%);
-    background: #d7444e;
-}
-
-.monster.awake .iris {
-    transform:
-        translate(-50%,-50%)
-        scale(.8);
-}
-
-.monster.awake .mouth {
-    width: 135px;
-    height: 82px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #17090c,
-            #4b1019
-        );
-}
-
-.monster.awake .teeth {
-    opacity: 1;
-}
-
-.monster.awake .monster-shadow {
-    width: 300px;
-}
-
-/* =========================================================
-   ANGRY EFFECTS
-   ========================================================= */
-
-.angry-rays {
-    position: absolute;
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: 0;
-
-    transition: .3s;
-}
-
-.monster.awake .angry-rays {
-    opacity: 1;
-}
-
-.ray {
-    position: absolute;
-
+    top: 40px; right: 20px;
     font-size: 42px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 14px #a8d8ea, 0 0 25px #7597de;
+    opacity: 1;
+    animation: floatZ 2.5s ease-in-out infinite;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  @keyframes floatZ {
+    0%,100% { transform: translateY(0); opacity: 0.6; }
+    50%     { transform: translateY(-22px); opacity: 1; }
+  }
+  .monster.awake .zzz { opacity: 0; }
 
-    animation: rayPulse .7s infinite alternate;
-}
-
-.ray.r1 {
-    top: 25px;
-    left: 5px;
-}
-
-.ray.r2 {
-    top: 50px;
-    right: 5px;
-}
-
-.ray.r3 {
-    bottom: 100px;
-    left: 0;
-}
-
-.ray.r4 {
-    bottom: 80px;
-    right: 0;
-}
-
-@keyframes rayPulse {
-    from {
-        transform: scale(.75) rotate(-8deg);
-        opacity: .3;
-    }
-
-    to {
-        transform: scale(1.15) rotate(8deg);
-        opacity: 1;
-    }
-}
-
-/* =========================================================
-   COOKIE
-   ========================================================= */
-
-.cookie {
+  /* Пар из носа */
+  .steam {
     position: absolute;
-
-    bottom: 0;
-    right: -15px;
-
-    width: 92px;
-    height: 92px;
-
-    cursor: grab;
-
-    z-index: 20;
-
-    filter:
-        drop-shadow(0 10px 12px rgba(0,0,0,.3));
-
-    animation:
-        cookieFloat 2.2s ease-in-out infinite;
-
-    transition: .3s;
-}
-
-.cookie:hover {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.cookie:active {
-    cursor: grabbing;
-}
-
-@keyframes cookieFloat {
-    0%,100% {
-        transform: translateY(0) rotate(-4deg);
-    }
-
-    50% {
-        transform: translateY(-10px) rotate(5deg);
-    }
-}
-
-.cookie.hidden {
-    display: none;
-}
-
-/* =========================================================
-   SOUND METER
-   ========================================================= */
-
-.sound-box {
-    width: min(600px, 90%);
-
-    margin-top: 5px;
-
-    padding: 15px 18px;
-
-    border-radius: 24px;
-
-    background: rgba(5,20,45,.22);
-
-    border: 1px solid rgba(255,255,255,.16);
-
-    backdrop-filter: blur(10px);
-}
-
-.sound-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    margin-bottom: 9px;
-}
-
-.sound-title {
-    font-size: 12px;
-    opacity: .7;
-}
-
-.sound-value {
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.sound-meter {
-    height: 18px;
-
-    background:
-        rgba(255,255,255,.14);
-
-    border-radius: 20px;
-
-    overflow: hidden;
-
-    position: relative;
-}
-
-.sound-fill {
-    height: 100%;
-
-    width: 0%;
-
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            90deg,
-            #54dd77 0%,
-            #dce85b 55%,
-            #ff9f43 75%,
-            #ff4e58 100%
-        );
-
-    transition: width .08s linear;
-}
-
-.threshold-marker {
-    position: absolute;
-
-    top: -3px;
-    bottom: -3px;
-
-    width: 3px;
-
-    background: white;
-
-    box-shadow:
-        0 0 8px white;
-
-    left: 20%;
-}
-
-/* =========================================================
-   RIGHT PANEL
-   ========================================================= */
-
-.right-panel {
-    padding: 22px;
-}
-
-.panel-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    margin-bottom: 20px;
-}
-
-.panel-title h2 {
-    font-size: 18px;
-}
-
-.live {
-    padding: 5px 9px;
-
-    border-radius: 20px;
-
-    background: rgba(89,229,119,.18);
-
-    color: #9affae;
-
-    font-size: 10px;
-    font-weight: bold;
-}
-
-.control {
-    margin-bottom: 19px;
-}
-
-.control-head {
-    display: flex;
-    justify-content: space-between;
-
-    margin-bottom: 8px;
-
-    font-size: 12px;
-}
-
-.control-value {
-    color: #ffe36b;
-    font-weight: bold;
-}
-
-input[type=range] {
-    width: 100%;
-
-    accent-color: #70e981;
-
-    cursor: pointer;
-}
-
-.control-help {
-    display: block;
-
-    margin-top: 5px;
-
-    font-size: 10px;
-    line-height: 1.4;
-
-    color: rgba(255,255,255,.5);
-}
-
-/* =========================================================
-   START SCREEN
-   ========================================================= */
-
-.start-screen {
-    position: fixed;
-    inset: 0;
-
-    z-index: 100;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(80,140,190,.25),
-            rgba(10,25,55,.5)
-        );
-
-    backdrop-filter: blur(8px);
-
-    transition: .5s;
-}
-
-.start-card {
-    width: min(570px, calc(100% - 30px));
-
-    padding: 38px;
-
-    text-align: center;
-
-    border-radius: 35px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.22),
-            rgba(255,255,255,.08)
-        );
-
-    border: 1px solid rgba(255,255,255,.3);
-
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.35);
-
-    backdrop-filter: blur(20px);
-}
-
-.start-monster {
-    font-size: 95px;
-
-    margin-bottom: 10px;
-
-    filter:
-        drop-shadow(0 12px 12px rgba(0,0,0,.25));
-
-    animation:
-        startMonster 2s ease-in-out infinite;
-}
-
-@keyframes startMonster {
-    0%,100% {
-        transform: translateY(0) rotate(-2deg);
-    }
-
-    50% {
-        transform: translateY(-12px) rotate(2deg);
-    }
-}
-
-.start-card h1 {
-    font-size: 35px;
-    line-height: 1.05;
-
-    margin-bottom: 12px;
-}
-
-.start-card h1 span {
-    color: #ffe36b;
-}
-
-.start-card p {
-    max-width: 430px;
-
-    margin: auto auto 25px;
-
-    font-size: 14px;
-    line-height: 1.6;
-
-    opacity: .78;
-}
-
-.start-btn {
-    border: none;
-
-    padding: 17px 34px;
-
-    border-radius: 50px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffd84e,
-            #ff9b42
-        );
-
-    color: #3d2b14;
-
-    font-size: 18px;
-    font-weight: 900;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 12px 30px rgba(255,170,60,.3);
-
-    transition: .25s;
-}
-
-.start-btn:hover {
-    transform: translateY(-3px) scale(1.04);
-
-    box-shadow:
-        0 16px 35px rgba(255,170,60,.4);
-}
-
-.start-btn:active {
-    transform: scale(.97);
-}
-
-/* =========================================================
-   HIDE
-   ========================================================= */
-
-.hidden {
-    display: none !important;
-}
-
-/* =========================================================
-   REWARD POPUP
-   ========================================================= */
-
-.reward {
-    position: fixed;
-
-    left: 50%;
-    top: 42%;
-
-    transform:
-        translate(-50%,-50%)
-        scale(.5);
-
-    z-index: 200;
-
-    padding: 18px 28px;
-
-    border-radius: 24px;
-
-    background: rgba(255,255,255,.95);
-
-    color: #263452;
-
-    font-size: 23px;
-    font-weight: 900;
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.3);
-
+    top: 235px;
+    width: 48px; height: 48px;
+    background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,180,180,0) 70%);
+    border-radius: 50%;
     opacity: 0;
     pointer-events: none;
-}
+    z-index: 4;
+  }
+  .steam.left  { left: 100px; }
+  .steam.right { right: 100px; }
+  .monster.awake .steam { animation: steamPuff 1.3s ease-out infinite; }
+  .monster.awake .steam.right { animation-delay: 0.65s; }
+  @keyframes steamPuff {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    30%  { opacity: 0.95; transform: translateY(-25px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-75px) scale(2); }
+  }
 
-.reward.show {
-    animation: rewardShow 1.5s ease forwards;
-}
-
-@keyframes rewardShow {
-    0% {
-        opacity: 0;
-        transform:
-            translate(-50%,-50%)
-            scale(.5);
-    }
-
-    20% {
-        opacity: 1;
-        transform:
-            translate(-50%,-50%)
-            scale(1.08);
-    }
-
-    70% {
-        opacity: 1;
-        transform:
-            translate(-50%,-50%)
-            scale(1);
-    }
-
-    100% {
-        opacity: 0;
-        transform:
-            translate(-50%,-80%)
-            scale(.9);
-    }
-}
-
-/* =========================================================
-   CONFETTI
-   ========================================================= */
-
-.confetti {
-    position: fixed;
-
-    width: 9px;
-    height: 14px;
-
-    top: -20px;
-
-    z-index: 250;
-
+  /* Молнии */
+  .lightning {
+    position: absolute;
+    opacity: 0;
     pointer-events: none;
+    filter: drop-shadow(0 0 15px #ffe066) drop-shadow(0 0 25px #ffb300);
+    z-index: 5;
+  }
+  .lightning svg { display: block; }
+  .lightning.l1 { top: 10px;  left: -40px;  }
+  .lightning.l2 { top: 40px;  right: -45px; }
+  .lightning.l3 { bottom: 90px; left: -35px;  }
+  .lightning.l4 { bottom: 60px; right: -35px; }
+  .monster.awake .lightning { animation: zap 0.95s ease-in-out infinite; }
+  .monster.awake .lightning.l2 { animation-delay: 0.24s; }
+  .monster.awake .lightning.l3 { animation-delay: 0.48s; }
+  .monster.awake .lightning.l4 { animation-delay: 0.72s; }
+  @keyframes zap {
+    0%,70%,100% { opacity: 0; transform: scale(0.7); }
+    74%,86%     { opacity: 1; transform: scale(1.25); }
+  }
 
-    animation:
-        confettiFall 1.8s linear forwards;
-}
+  /* Вены */
+  .vein { opacity: 0; transition: opacity 0.4s ease; }
+  .monster.awake .vein { opacity: 1; animation: veinPulse 1s infinite; }
+  @keyframes veinPulse { 0%,100% { opacity: 0.45 } 50% { opacity: 1 } }
 
-@keyframes confettiFall {
-    to {
-        transform:
-            translateY(110vh)
-            rotate(720deg);
-        opacity: 0;
-    }
-}
+  /* ====== ПЕЧЕНЬКА ====== */
+  .cookie {
+    position: fixed;
+    width: 110px; height: 110px;
+    cursor: grab;
+    z-index: 100;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
+    animation: cookieFloat 2.2s ease-in-out infinite;
+  }
+  @keyframes cookieFloat {
+    0%,100% { transform: translateY(0) rotate(-4deg); }
+    50%     { transform: translateY(-10px) rotate(4deg); }
+  }
+  .cookie:active { cursor: grabbing; }
+  .cookie.hidden { display: none; }
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
+  .crumb {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: #c98b3c;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99;
+  }
 
-@media (max-width: 1100px) {
-    .app {
-        grid-template-columns: 220px 1fr;
-    }
+  .yum {
+    position: fixed;
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7), 0 0 20px #ffb300;
+    pointer-events: none;
+    z-index: 200;
+    animation: yumFloat 1.6s ease-out forwards;
+  }
+  @keyframes yumFloat {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    20%  { opacity: 1; transform: translateY(-20px) scale(1.25); }
+    100% { opacity: 0; transform: translateY(-95px) scale(1); }
+  }
 
-    .right-panel {
-        display: none;
-    }
-}
+  /* ====== ИНДИКАТОР ====== */
+  .meter {
+    width: 420px; height: 26px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.35);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .meter-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #4caf50, #ffeb3b, #ff5722);
+    border-radius: 20px;
+    transition: width 0.08s linear;
+    box-shadow: 0 0 12px rgba(255,255,255,0.4);
+  }
+  .meter-threshold {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 3px;
+    background: #fff;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    transition: left 0.3s ease;
+  }
 
-@media (max-width: 750px) {
-    html,
-    body {
-        overflow: auto;
-    }
+  .status {
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+    transition: color 0.4s ease;
+  }
+  .status.awake { color: #ffe0b2; text-shadow: 0 0 20px rgba(255,80,80,0.8); }
 
-    body {
-        min-height: 100%;
-    }
+  .start-btn {
+    padding: 22px 52px;
+    font-size: 26px;
+    font-family: inherit; font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #ff9800, #f44336);
+    border: none; border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5), 0 0 30px rgba(255,152,0,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .start-btn:hover  { transform: translateY(-3px) scale(1.05); box-shadow: 0 14px 35px rgba(0,0,0,0.6), 0 0 40px rgba(255,152,0,0.6); }
+  .start-btn:active { transform: scale(0.97); }
 
-    .app {
-        min-height: 100vh;
-        height: auto;
+  .hint {
+    color: #fff; opacity: 0.85;
+    font-size: 16px; text-align: center;
+    max-width: 500px; line-height: 1.55;
+  }
 
-        grid-template-columns: 1fr;
+  .hidden { display: none !important; }
 
-        padding:
-            80px 15px 30px;
-    }
+  /* ====== НАСТРОЙКИ ====== */
+  .settings-toggle {
+    position: fixed; top: 20px; right: 20px;
+    width: 58px; height: 58px;
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    color: #fff; font-size: 28px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s, background 0.2s;
+  }
+  .settings-toggle:hover { background: rgba(255,255,255,0.32); transform: rotate(45deg); }
 
-    .left-panel {
-        display: none;
-    }
-
-    .monster-wrapper {
-        transform: scale(.8);
-        margin: -30px 0;
-    }
-
-    .sound-box {
-        width: 95%;
-    }
-}
+  .settings-panel {
+    position: fixed; top: 92px; right: 20px;
+    width: 350px;
+    max-height: 78vh;
+    overflow-y: auto;
+    background: rgba(15,15,30,0.95);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 22px;
+    padding: 24px;
+    color: #fff;
+    backdrop-filter: blur(12px);
+    z-index: 49;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    transform: translateY(-15px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .settings-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .settings-panel h3 {
+    font-size: 20px;
+    margin-bottom: 18px;
+    color: #ffd54f;
+    text-align: center;
+    text-shadow: 0 0 12px rgba(255,213,79,0.5);
+  }
+  .setting { margin-bottom: 20px; }
+  .setting label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #e0e0e0;
+  }
+  .setting .value {
+    float: right;
+    color: #ffd54f;
+    font-weight: bold;
+  }
+  .setting input[type="range"] {
+    width: 100%;
+    accent-color: #ff9800;
+    cursor: pointer;
+  }
+  .setting .desc {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .calib-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    background: rgba(76,175,80,0.3);
+    border-radius: 10px;
+    font-size: 11px;
+    color: #a5d6a7;
+    margin-left: 6px;
+  }
 </style>
 </head>
-
 <body>
 
-<div class="background-glow"></div>
 <div class="stars"></div>
+<div class="rage-vignette"></div>
 
-<!-- ======================================================
-     TOP BAR
-     ====================================================== -->
+<button class="settings-toggle" id="settingsToggle" title="Настройки">⚙</button>
 
-<div class="topbar">
+<div class="settings-panel" id="settingsPanel">
+  <h3>⚙ Настройки монстрика</h3>
 
-    <div class="logo">
-        <div class="logo-icon">👾</div>
+  <div class="setting">
+    <label>🎤 Усиление микрофона <span class="value" id="gainVal">10x</span></label>
+    <input type="range" id="gainRange" min="1" max="40" value="10">
+    <span class="desc">Если монстр не слышит класс — поднимайте. Для тихого микрофона ставьте 20–30x.</span>
+  </div>
 
-        <div class="logo-text">
-            <strong>Хранитель Тишины</strong>
-            <span>Помогаем монстрику спать</span>
-        </div>
+  <div class="setting">
+    <label>🔊 Порог громкости <span class="value" id="thresholdVal">5</span></label>
+    <input type="range" id="thresholdRange" min="1" max="40" value="5">
+    <span class="desc">Меньше — чувствительнее. Калибровка <span class="calib-badge" id="calibBadge">—</span></span>
+  </div>
+
+  <div class="setting">
+    <label>⏱ Длительность шума <span class="value" id="durationVal">0.6 с</span></label>
+    <input type="range" id="durationRange" min="0" max="30" value="6">
+    <span class="desc">0 — мгновенно на резкий звук. 2–3 сек — ловит продолжительный бубнёж.</span>
+  </div>
+
+  <div class="setting">
+    <label>😴 Время успокоения <span class="value" id="sleepVal">8 с</span></label>
+    <input type="range" id="sleepRange" min="3" max="20" value="8">
+    <span class="desc">Сколько должно быть тихо, чтобы монстр сам заснул.</span>
+  </div>
+
+  <div class="setting">
+    <label>🔈 Громкость рычания <span class="value" id="volumeVal">70</span></label>
+    <input type="range" id="volumeRange" min="0" max="100" value="70">
+    <span class="desc">Громкость рыка при пробуждении.</span>
+  </div>
+</div>
+
+<!-- ЭКРАН ЗАПУСКА -->
+<div id="startScreen" class="stage">
+  <div style="font-size:110px; filter: drop-shadow(0 0 25px rgba(120,200,255,0.6));">👾</div>
+  <h1 style="color:#fff;font-size:36px;text-shadow:0 2px 15px rgba(0,0,0,0.6);">Монстрик-Хранитель Тишины</h1>
+  <p class="hint">
+    Нажми кнопку и разреши доступ к микрофону.<br>
+    Первую секунду монстрик слушает тишину, чтобы откалиброваться — не шуми.<br>
+    Чтобы успокоить монстра — <b>перетащи печеньку 🍪 на него</b>.
+  </p>
+  <button class="start-btn" id="startBtn">▶ Запустить монстрика</button>
+</div>
+
+<!-- ОСНОВНАЯ СЦЕНА -->
+<div id="mainScreen" class="stage hidden">
+  <div class="status" id="status">😴 Тихо… монстрик спит</div>
+
+  <div class="monster" id="monster">
+
+    <!-- МОЛНИИ -->
+    <div class="lightning l1">
+      <svg width="50" height="70" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l2">
+      <svg width="50" height="70" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l3">
+      <svg width="42" height="60" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l4">
+      <svg width="42" height="60" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
     </div>
 
-    <button class="settings-btn" id="settingsToggle">
-        ⚙
-    </button>
+    <!-- ПАР ИЗ НОСА -->
+    <div class="steam left"></div>
+    <div class="steam right"></div>
 
+    <!-- МОНСТР -->
+    <svg viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Градиент тела -->
+        <radialGradient id="bodyGrad" cx="38%" cy="32%" r="75%">
+          <stop class="body-gradient-stop-1" offset="0%"   stop-color="#b8ffb8"/>
+          <stop class="body-gradient-stop-2" offset="55%"  stop-color="#4caf50"/>
+          <stop class="body-gradient-stop-3" offset="100%" stop-color="#1b5e20"/>
+        </radialGradient>
+        <!-- Градиент тени на теле -->
+        <radialGradient id="bodyShade" cx="70%" cy="80%" r="70%">
+          <stop offset="0%" stop-color="rgba(0,0,0,0.4)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+        <!-- Градиент рогов -->
+        <linearGradient id="hornGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f5f5dc"/>
+          <stop offset="40%" stop-color="#cfcfae"/>
+          <stop offset="100%" stop-color="#5d5d3d"/>
+        </linearGradient>
+        <!-- Градиент глаза -->
+        <radialGradient id="eyeGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#d8ecd8"/>
+        </radialGradient>
+        <!-- Градиент радужки -->
+        <radialGradient id="irisGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ffd54f"/>
+          <stop offset="50%" stop-color="#f57c00"/>
+          <stop offset="100%" stop-color="#3e1f00"/>
+        </radialGradient>
+        <!-- Свечение -->
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Тень на полу -->
+      <ellipse cx="230" cy="500" rx="160" ry="18" fill="rgba(0,0,0,0.35)"/>
+
+      <!-- РОГА -->
+      <path class="horn-fill" d="M 118 130 Q 95 60 115 20 Q 130 40 140 85 Q 148 110 142 135 Z" fill="url(#hornGrad)" stroke="#3e3e26" stroke-width="2"/>
+      <path class="horn-fill" d="M 342 130 Q 365 60 345 20 Q 330 40 320 85 Q 312 110 318 135 Z" fill="url(#hornGrad)" stroke="#3e3e26" stroke-width="2"/>
+
+      <!-- ТЕЛО -->
+      <path d="M 230 145
+               Q 110 145 95 270
+               Q 85 400 160 455
+               Q 230 485 300 455
+               Q 375 400 365 270
+               Q 350 145 230 145 Z"
+            fill="url(#bodyGrad)" stroke="#1b5e20" stroke-width="3"/>
+      <path d="M 230 145
+               Q 110 145 95 270
+               Q 85 400 160 455
+               Q 230 485 300 455
+               Q 375 400 365 270
+               Q 350 145 230 145 Z"
+            fill="url(#bodyShade)"/>
+
+      <!-- ПЯТНЫШКИ -->
+      <circle cx="150" cy="250" r="22" fill="rgba(255,255,255,0.28)"/>
+      <circle cx="130" cy="320" r="14" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="310" cy="300" r="28" fill="rgba(255,255,255,0.28)"/>
+      <circle cx="330" cy="380" r="16" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="180" cy="400" r="18" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="270" cy="430" r="12" fill="rgba(255,255,255,0.22)"/>
+
+      <!-- ВЕНЫ (видны при злости) -->
+      <g class="vein" stroke="#7a0000" stroke-width="4" stroke-linecap="round" fill="none">
+        <path d="M 140 280 Q 155 300 150 330"/>
+        <path d="M 320 270 Q 305 300 315 340"/>
+        <path d="M 200 420 Q 215 400 235 415"/>
+        <path d="M 285 430 Q 275 405 255 425"/>
+      </g>
+
+      <!-- ЛАПЫ (снизу, чтобы торчали из-под тела) -->
+      <ellipse class="paw-fill" cx="140" cy="470" rx="55" ry="30" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+      <ellipse class="paw-fill" cx="320" cy="470" rx="55" ry="30" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+      <!-- Когти левой -->
+      <path d="M 100 470 L 90 485 L 105 478 Z" fill="#f5f5dc" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 120 468 L 115 487 L 128 478 Z" fill="#f5f5dc" stroke="#3e3e26" stroke-width="1.5"/>
+      <!-- Когти правой -->
+      <path d="M 360 470 L 370 485 L 355 478 Z" fill="#f5f5dc" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 340 468 L 345 487 L 332 478 Z" fill="#f5f5dc" stroke="#3e3e26" stroke-width="1.5"/>
+
+      <!-- ГЛАЗ (большой, циклоп) -->
+      <g>
+        <ellipse cx="230" cy="265" rx="82" ry="88" fill="#1b3a1b" stroke="#0d1f0d" stroke-width="3"/>
+        <ellipse cx="230" cy="265" rx="72" ry="78" fill="url(#eyeGrad)" stroke="#0d1f0d" stroke-width="2"/>
+
+        <!-- Радужка + зрачок (эта группа сдвигается и сужается при злости) -->
+        <g class="pupil-group" style="transform-origin: 230px 265px;">
+          <circle cx="230" cy="265" r="30" fill="url(#irisGrad)"/>
+          <circle cx="230" cy="265" r="16" fill="#0a0a0a"/>
+          <circle cx="222" cy="256" r="6" fill="#fff" opacity="0.95"/>
+          <circle cx="240" cy="278" r="3" fill="#fff" opacity="0.7"/>
+        </g>
+
+        <!-- ВЕКО (при злости уезжает вверх) -->
+        <path class="eyelid"
+              d="M 148 265 Q 230 145 312 265 Q 230 265 148 265 Z"
+              fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
+
+        <!-- Ресница на веко (приятная деталь) -->
+        <g class="eyelid" style="transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1);">
+          <path d="M 175 195 Q 165 180 155 185" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 230 175 L 230 158" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 285 195 Q 295 180 305 185" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- БРОВИ (только при злости) -->
+      <g class="brow-group">
+        <path d="M 155 210 Q 180 195 205 205" stroke="#2b0000" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M 305 210 Q 280 195 255 205" stroke="#2b0000" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- РОТ: улыбка во сне -->
+      <g class="mouth-sleep">
+        <path d="M 195 360 Q 230 385 265 360" stroke="#1b3a1b" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="195" cy="360" r="3" fill="#1b3a1b"/>
+        <circle cx="265" cy="360" r="3" fill="#1b3a1b"/>
+      </g>
+
+      <!-- РОТ: оскал при злости -->
+      <g class="mouth-rage">
+        <path d="M 175 350 Q 230 430 285 350 Q 230 375 175 350 Z"
+              fill="#3b0000" stroke="#1b3a1b" stroke-width="3"/>
+        <!-- Верхние клыки -->
+        <path d="M 190 352 L 200 380 L 210 352 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 215 350 L 225 385 L 235 350 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 240 350 L 250 385 L 260 350 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 265 352 L 275 380 L 285 352 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <!-- Нижние клыки -->
+        <path d="M 200 380 L 208 360 L 216 380 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 245 380 L 253 360 L 261 380 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <!-- Язык -->
+        <ellipse cx="230" cy="400" rx="18" ry="10" fill="#d32f2f"/>
+      </g>
+
+      <!-- НОЗДРИ (для пара) -->
+      <ellipse cx="210" cy="330" rx="5" ry="4" fill="#1b3a1b" opacity="0.6"/>
+      <ellipse cx="250" cy="330" rx="5" ry="4" fill="#1b3a1b" opacity="0.6"/>
+
+      <!-- БЛИК на теле -->
+      <ellipse cx="180" cy="200" rx="30" ry="45" fill="rgba(255,255,255,0.18)" transform="rotate(-25 180 200)"/>
+    </svg>
+
+    <div class="zzz">Z z z</div>
+  </div>
+
+  <div class="meter">
+    <div class="meter-fill" id="meterFill"></div>
+    <div class="meter-threshold" id="meterThreshold"></div>
+  </div>
 </div>
 
-
-<!-- ======================================================
-     START
-     ====================================================== -->
-
-<div class="start-screen" id="startScreen">
-
-    <div class="start-card">
-
-        <div class="start-monster">
-            👾
-        </div>
-
-        <h1>
-            Монстрик-<span>Хранитель Тишины</span>
-        </h1>
-
-        <p>
-            Монстрик очень любит спать.
-            Но если в классе становится слишком шумно,
-            он просыпается. Помогите ему спокойно проспать
-            весь урок!
-        </p>
-
-        <button class="start-btn" id="startBtn">
-            🎤 Начать урок
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- ======================================================
-     APP
-     ====================================================== -->
-
-<main class="app" id="app">
-
-    <!-- LEFT -->
-
-    <section class="panel left-panel">
-
-        <h1>
-            Миссия:<br>
-            <span>сохранить тишину</span>
-        </h1>
-
-        <p class="description">
-            Монстрик слушает класс через микрофон.
-            Чем тише вокруг, тем спокойнее он себя чувствует.
-        </p>
-
-
-        <div class="mission">
-
-            <div class="mission-title">
-                ТЕКУЩАЯ МИССИЯ
-            </div>
-
-            <div class="mission-main" id="missionText">
-                Сохраняем тишину
-            </div>
-
-            <div class="mission-progress">
-                <div
-                    class="mission-progress-fill"
-                    id="missionProgress">
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="stat-row">
-
-            <div class="stat-label">
-                Тихая серия
-            </div>
-
-            <div class="stat-value">
-                <span id="quietStreak">0</span> мин
-            </div>
-
-        </div>
-
-
-        <div class="stat-row">
-
-            <div class="stat-label">
-                Награды
-            </div>
-
-            <div class="stat-value">
-                ⭐ <span id="starsCount">0</span>
-            </div>
-
-        </div>
-
-
-        <div class="stat-row">
-
-            <div class="stat-label">
-                Пробуждений
-            </div>
-
-            <div class="stat-value">
-                <span id="wakeCount">0</span>
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- CENTER -->
-
-    <section class="monster-area">
-
-        <div class="speech" id="speech">
-            😴 Я сплю... пожалуйста, потише
-        </div>
-
-
-        <div class="monster-wrapper">
-
-            <div class="monster-shadow"></div>
-
-            <div class="monster" id="monster">
-
-                <div class="angry-rays">
-
-                    <div class="ray r1">⚡</div>
-                    <div class="ray r2">💢</div>
-                    <div class="ray r3">⚡</div>
-                    <div class="ray r4">💥</div>
-
-                </div>
-
-
-                <div class="horn left"></div>
-                <div class="horn right"></div>
-
-
-                <div class="monster-body">
-
-                    <div class="spot s1"></div>
-                    <div class="spot s2"></div>
-                    <div class="spot s3"></div>
-                    <div class="spot s4"></div>
-                    <div class="spot s5"></div>
-
-                </div>
-
-
-                <div class="brow left"></div>
-                <div class="brow right"></div>
-
-
-                <div class="eye">
-
-                    <div class="iris">
-
-                        <div class="pupil"></div>
-
-                    </div>
-
-                    <div class="eyelid"></div>
-
-                </div>
-
-
-                <div class="mouth">
-
-                    <div class="teeth">
-
-                        <div class="tooth"></div>
-                        <div class="tooth"></div>
-                        <div class="tooth"></div>
-                        <div class="tooth"></div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="foot left"></div>
-                <div class="foot right"></div>
-
-            </div>
-
-
-            <!-- COOKIE -->
-
-            <svg
-                class="cookie hidden"
-                id="cookie"
-                viewBox="0 0 100 100"
-            >
-
-                <defs>
-
-                    <radialGradient
-                        id="cookieGradient"
-                        cx="35%"
-                        cy="30%"
-                    >
-
-                        <stop
-                            offset="0"
-                            stop-color="#ffe0a1"
-                        />
-
-                        <stop
-                            offset=".65"
-                            stop-color="#d89a4d"
-                        />
-
-                        <stop
-                            offset="1"
-                            stop-color="#8b571e"
-                        />
-
-                    </radialGradient>
-
-                </defs>
-
-                <circle
-                    cx="50"
-                    cy="50"
-                    r="46"
-                    fill="url(#cookieGradient)"
-                    stroke="#713e12"
-                    stroke-width="3"
-                />
-
-                <circle cx="28" cy="37" r="6" fill="#4c270b"/>
-                <circle cx="57" cy="27" r="5" fill="#4c270b"/>
-                <circle cx="72" cy="45" r="6" fill="#4c270b"/>
-                <circle cx="42" cy="52" r="5" fill="#4c270b"/>
-                <circle cx="68" cy="68" r="5" fill="#4c270b"/>
-                <circle cx="30" cy="70" r="4" fill="#4c270b"/>
-                <circle cx="52" cy="78" r="5" fill="#4c270b"/>
-
-            </svg>
-
-        </div>
-
-
-        <!-- SOUND -->
-
-        <div class="sound-box">
-
-            <div class="sound-header">
-
-                <span class="sound-title">
-                    🎤 УРОВЕНЬ ШУМА В КЛАССЕ
-                </span>
-
-                <span
-                    class="sound-value"
-                    id="soundValue"
-                >
-                    Тихо
-                </span>
-
-            </div>
-
-
-            <div class="sound-meter">
-
-                <div
-                    class="sound-fill"
-                    id="soundFill"
-                ></div>
-
-                <div
-                    class="threshold-marker"
-                    id="thresholdMarker"
-                ></div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- RIGHT -->
-
-    <aside
-        class="panel right-panel"
-        id="settingsPanel"
-    >
-
-        <div class="panel-title">
-
-            <h2>⚙ Настройки</h2>
-
-            <span class="live">
-                ● LIVE
-            </span>
-
-        </div>
-
-
-        <!-- threshold -->
-
-        <div class="control">
-
-            <div class="control-head">
-
-                <span>
-                    🔊 Чувствительность
-                </span>
-
-                <span
-                    class="control-value"
-                    id="thresholdValue"
-                >
-                    5
-                </span>
-
-            </div>
-
-            <input
-                type="range"
-                id="thresholdRange"
-                min="1"
-                max="25"
-                value="5"
-            >
-
-            <span class="control-help">
-                Чем меньше число, тем раньше монстрик заметит шум.
-            </span>
-
-        </div>
-
-
-        <!-- duration -->
-
-        <div class="control">
-
-            <div class="control-head">
-
-                <span>
-                    ⏱ Реакция на шум
-                </span>
-
-                <span
-                    class="control-value"
-                    id="durationValue"
-                >
-                    0.6 с
-                </span>
-
-            </div>
-
-            <input
-                type="range"
-                id="durationRange"
-                min="0"
-                max="30"
-                value="6"
-            >
-
-            <span class="control-help">
-                Сколько секунд должен продолжаться шум,
-                чтобы монстр проснулся.
-            </span>
-
-        </div>
-
-
-        <!-- sleep -->
-
-        <div class="control">
-
-            <div class="control-head">
-
-                <span>
-                    😴 Засыпание
-                </span>
-
-                <span
-                    class="control-value"
-                    id="sleepValue"
-                >
-                    8 с
-                </span>
-
-            </div>
-
-            <input
-                type="range"
-                id="sleepRange"
-                min="3"
-                max="20"
-                value="8"
-            >
-
-            <span class="control-help">
-                Сколько секунд должно быть тихо,
-                чтобы монстрик снова уснул.
-            </span>
-
-        </div>
-
-
-        <!-- growl -->
-
-        <div class="control">
-
-            <div class="control-head">
-
-                <span>
-                    👹 Рычание
-                </span>
-
-                <span
-                    class="control-value"
-                    id="volumeValue"
-                >
-                    60%
-                </span>
-
-            </div>
-
-            <input
-                type="range"
-                id="volumeRange"
-                min="0"
-                max="100"
-                value="60"
-            >
-
-        </div>
-
-
-        <div class="mission">
-
-            <div class="mission-title">
-                КАЛИБРОВКА
-            </div>
-
-            <div
-                class="mission-main"
-                id="calibrationStatus"
-            >
-                Готов
-            </div>
-
-        </div>
-
-    </aside>
-
-</main>
-
-
-<!-- REWARD -->
-
-<div
-    class="reward"
-    id="reward"
->
-    ⭐ Отлично! Тихая минута!
-</div>
-
+<!-- ПЕЧЕНЬКА -->
+<svg class="cookie hidden" id="cookie" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="cookieGrad" cx="40%" cy="35%">
+      <stop offset="0%"  stop-color="#f0c078"/>
+      <stop offset="55%" stop-color="#c98b3c"/>
+      <stop offset="100%" stop-color="#7a4a12"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" fill="url(#cookieGrad)" stroke="#5a3208" stroke-width="3"/>
+  <circle cx="35" cy="35" r="6" fill="#3a1e00"/>
+  <circle cx="65" cy="30" r="5" fill="#3a1e00"/>
+  <circle cx="30" cy="60" r="5" fill="#3a1e00"/>
+  <circle cx="55" cy="55" r="6" fill="#3a1e00"/>
+  <circle cx="70" cy="65" r="5" fill="#3a1e00"/>
+  <circle cx="45" cy="75" r="5" fill="#3a1e00"/>
+  <circle cx="75" cy="45" r="4" fill="#3a1e00"/>
+  <circle cx="20" cy="45" r="4" fill="#3a1e00"/>
+  <circle cx="50" cy="20" r="3" fill="#3a1e00"/>
+  <ellipse cx="35" cy="25" rx="10" ry="6" fill="rgba(255,255,255,0.35)"/>
+</svg>
 
 <script>
+/* ============================================================
+   МОНСТРИК v4 — крутой SVG монстр + реалистичный рык
+   ============================================================ */
 
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
+const startScreen   = document.getElementById('startScreen');
+const mainScreen    = document.getElementById('mainScreen');
+const startBtn      = document.getElementById('startBtn');
+const monsterEl     = document.getElementById('monster');
+const meterFill     = document.getElementById('meterFill');
+const meterThreshold= document.getElementById('meterThreshold');
+const statusEl      = document.getElementById('status');
+const cookieEl      = document.getElementById('cookie');
+const calibBadge    = document.getElementById('calibBadge');
 
-const startScreen = document.getElementById("startScreen");
-const startBtn = document.getElementById("startBtn");
+const settingsToggle = document.getElementById('settingsToggle');
+const settingsPanel  = document.getElementById('settingsPanel');
+const gainRange      = document.getElementById('gainRange');
+const thresholdRange = document.getElementById('thresholdRange');
+const durationRange  = document.getElementById('durationRange');
+const sleepRange     = document.getElementById('sleepRange');
+const volumeRange    = document.getElementById('volumeRange');
+const gainVal      = document.getElementById('gainVal');
+const thresholdVal = document.getElementById('thresholdVal');
+const durationVal  = document.getElementById('durationVal');
+const sleepVal     = document.getElementById('sleepVal');
+const volumeVal    = document.getElementById('volumeVal');
 
-const app = document.getElementById("app");
-
-const monster = document.getElementById("monster");
-const speech = document.getElementById("speech");
-
-const soundFill = document.getElementById("soundFill");
-const soundValue = document.getElementById("soundValue");
-
-const thresholdMarker =
-    document.getElementById("thresholdMarker");
-
-const cookie =
-    document.getElementById("cookie");
-
-const reward =
-    document.getElementById("reward");
-
-const quietStreak =
-    document.getElementById("quietStreak");
-
-const starsCount =
-    document.getElementById("starsCount");
-
-const wakeCount =
-    document.getElementById("wakeCount");
-
-const missionProgress =
-    document.getElementById("missionProgress");
-
-const missionText =
-    document.getElementById("missionText");
-
-const calibrationStatus =
-    document.getElementById("calibrationStatus");
-
-const thresholdRange =
-    document.getElementById("thresholdRange");
-
-const durationRange =
-    document.getElementById("durationRange");
-
-const sleepRange =
-    document.getElementById("sleepRange");
-
-const volumeRange =
-    document.getElementById("volumeRange");
-
-const thresholdValue =
-    document.getElementById("thresholdValue");
-
-const durationValue =
-    document.getElementById("durationValue");
-
-const sleepValue =
-    document.getElementById("sleepValue");
-
-const volumeValue =
-    document.getElementById("volumeValue");
-
-const settingsToggle =
-    document.getElementById("settingsToggle");
-
-const settingsPanel =
-    document.getElementById("settingsPanel");
-
-
-/* =========================================================
-   SETTINGS
-   ========================================================= */
-
+/* ---------- Настройки ---------- */
 const settings = {
-
-    threshold: 0.05,
-
-    duration: 600,
-
-    sleepDelay: 8000,
-
-    volume: 0.6,
-
-    noiseFloor: 0
-
+  gain: 10,
+  threshold: 0.05,
+  duration: 600,
+  sleepDelay: 8000,
+  volume: 0.7,
+  noiseFloor: 0
 };
 
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-let audioContext = null;
-let analyser = null;
-let microphoneSource = null;
-let gainNode = null;
-
-let dataArray = null;
-
-let animationFrame = null;
-
+/* ---------- Состояние ---------- */
+let audioCtx, analyser, dataArray, source, gainNode;
 let isAwake = false;
+let noiseStartTime = null;
+let lastLoudTime = 0;
+let animationId;
 let isEating = false;
+let isCalibrating = false;
 
-let noiseStart = null;
-let lastLoud = 0;
+/* ---------- UI ---------- */
+settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
 
-let wakeCounter = 0;
-let starCounter = 0;
-
-let quietSeconds = 0;
-let lastMinuteReward = 0;
-
-let calibrationSamples = [];
-
-let draggingCookie = false;
-let cookieOffsetX = 0;
-let cookieOffsetY = 0;
-
-
-/* =========================================================
-   SETTINGS PANEL
-   ========================================================= */
-
-settingsToggle.addEventListener("click", () => {
-
-    settingsPanel.classList.toggle("hidden");
-
+gainRange.addEventListener('input', () => {
+  const v = +gainRange.value;
+  settings.gain = v;
+  gainVal.textContent = v + 'x';
+  if (gainNode) gainNode.gain.value = v;
 });
 
-
-/* =========================================================
-   RANGE CONTROLS
-   ========================================================= */
-
-thresholdRange.addEventListener("input", () => {
-
-    const value = Number(thresholdRange.value);
-
-    settings.threshold = value / 100;
-
-    thresholdValue.textContent = value;
-
-    updateThresholdMarker();
-
+thresholdRange.addEventListener('input', () => {
+  const v = +thresholdRange.value;
+  settings.threshold = v / 100;
+  thresholdVal.textContent = v;
+  updateThresholdMarker();
 });
 
-
-durationRange.addEventListener("input", () => {
-
-    const value = Number(durationRange.value);
-
-    settings.duration = value * 100;
-
-    durationValue.textContent =
-        (value / 10).toFixed(1) + " с";
-
+durationRange.addEventListener('input', () => {
+  const v = +durationRange.value;
+  settings.duration = v * 100;
+  durationVal.textContent = (v / 10).toFixed(1) + ' с';
 });
 
-
-sleepRange.addEventListener("input", () => {
-
-    const value = Number(sleepRange.value);
-
-    settings.sleepDelay = value * 1000;
-
-    sleepValue.textContent =
-        value + " с";
-
+sleepRange.addEventListener('input', () => {
+  const v = +sleepRange.value;
+  settings.sleepDelay = v * 1000;
+  sleepVal.textContent = v + ' с';
 });
 
-
-volumeRange.addEventListener("input", () => {
-
-    const value = Number(volumeRange.value);
-
-    settings.volume = value / 100;
-
-    volumeValue.textContent =
-        value + "%";
-
+volumeRange.addEventListener('input', () => {
+  const v = +volumeRange.value;
+  settings.volume = v / 100;
+  volumeVal.textContent = v;
 });
-
 
 function updateThresholdMarker() {
-
-    const value =
-        Number(thresholdRange.value);
-
-    const percent =
-        Math.min(value * 4, 100);
-
-    thresholdMarker.style.left =
-        percent + "%";
-
+  const pos = Math.min(settings.threshold * 4, 1) * 100;
+  meterThreshold.style.left = pos + '%';
 }
-
-
-/* =========================================================
-   START
-   ========================================================= */
-
-startBtn.addEventListener("click", async () => {
-
-    try {
-
-        const stream =
-            await navigator.mediaDevices.getUserMedia({
-
-                audio: {
-
-                    echoCancellation: false,
-
-                    noiseSuppression: false,
-
-                    autoGainControl: false
-
-                }
-
-            });
-
-
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-
-        microphoneSource =
-            audioContext.createMediaStreamSource(
-                stream
-            );
-
-
-        /*
-         * Усиление используется только для анализа.
-         * Мы не отправляем микрофон обратно в колонки,
-         * поэтому свиста/самовозбуждения не будет.
-         */
-
-        gainNode =
-            audioContext.createGain();
-
-        gainNode.gain.value = 4;
-
-
-        analyser =
-            audioContext.createAnalyser();
-
-        analyser.fftSize = 1024;
-
-        analyser.smoothingTimeConstant = .72;
-
-
-        microphoneSource
-            .connect(gainNode)
-            .connect(analyser);
-
-
-        dataArray =
-            new Uint8Array(
-                analyser.fftSize
-            );
-
-
-        startScreen.classList.add("hidden");
-
-        app.classList.remove("hidden");
-
-        spawnCookie();
-
-        calibrate();
-
-
-    } catch (error) {
-
-        alert(
-            "Не удалось получить доступ к микрофону.\n\n" +
-            error.message
-        );
-
-    }
-
-});
-
-
-/* =========================================================
-   CALIBRATION
-   ========================================================= */
-
-function calibrate() {
-
-    calibrationSamples = [];
-
-    calibrationStatus.textContent =
-        "Слушаю класс…";
-
-    speech.textContent =
-        "🎤 Тишина... монстрик слушает";
-
-    const start =
-        performance.now();
-
-
-    function sample() {
-
-        analyser.getByteTimeDomainData(
-            dataArray
-        );
-
-
-        const rms =
-            calculateRMS();
-
-
-        calibrationSamples.push(rms);
-
-
-        if (
-            performance.now() - start <
-            1800
-        ) {
-
-            requestAnimationFrame(sample);
-
-        } else {
-
-            finishCalibration();
-
-        }
-
-    }
-
-
-    sample();
-
-}
-
-
-function finishCalibration() {
-
-    const sorted =
-        [...calibrationSamples]
-            .sort((a,b) => a-b);
-
-
-    const index =
-        Math.floor(
-            sorted.length * .8
-        );
-
-
-    const baseline =
-        sorted[index] || .01;
-
-
-    settings.noiseFloor =
-        Math.max(
-            baseline * 1.8,
-            .018
-        );
-
-
-    calibrationStatus.textContent =
-        "Фон: " +
-        (settings.noiseFloor * 100).toFixed(1);
-
-
-    speech.textContent =
-        "😴 Я готов! Давайте сохраним тишину";
-
-    monster.classList.add("happy");
-
-
-    setTimeout(() => {
-
-        speech.textContent =
-            "😴 Я сплю... пожалуйста, потише";
-
-        monster.classList.remove("happy");
-
-    }, 2500);
-
-
-    quietSeconds = 0;
-
-    lastLoud = Date.now();
-
-    listenLoop();
-
-}
-
-
-/* =========================================================
-   AUDIO
-   ========================================================= */
-
-function calculateRMS() {
-
-    let sum = 0;
-
-    for (
-        let i = 0;
-        i < dataArray.length;
-        i++
-    ) {
-
-        const value =
-            (dataArray[i] - 128) / 128;
-
-        sum += value * value;
-
-    }
-
-    return Math.sqrt(
-        sum / dataArray.length
-    );
-
-}
-
-
-/* =========================================================
-   MAIN LOOP
-   ========================================================= */
-
-function listenLoop() {
-
-    if (!analyser) return;
-
-
-    analyser.getByteTimeDomainData(
-        dataArray
-    );
-
-
-    const rms =
-        calculateRMS();
-
-
-    /*
-     * Нормализация уровня.
-     * Благодаря этому шкала выглядит
-     * адекватно даже с разными микрофонами.
-     */
-
-    const visualLevel =
-        Math.min(
-            rms * 5,
-            1
-        );
-
-
-    soundFill.style.width =
-        visualLevel * 100 + "%";
-
-
-    const effectiveThreshold =
-        Math.max(
-            settings.threshold,
-            settings.noiseFloor
-        );
-
-
-    const now =
-        Date.now();
-
-
-    const isLoud =
-        rms > effectiveThreshold;
-
-
-    updateSoundText(
-        visualLevel,
-        isLoud
-    );
-
-
-    if (!isEating) {
-
-        if (isLoud) {
-
-            lastLoud = now;
-
-            if (noiseStart === null) {
-
-                noiseStart = now;
-
-            }
-
-
-            const duration =
-                now - noiseStart;
-
-
-            if (
-                !isAwake &&
-                duration >= settings.duration
-            ) {
-
-                wakeUp();
-
-            }
-
-
-            quietSeconds = 0;
-
-        } else {
-
-            if (
-                noiseStart !== null &&
-                now - lastLoud > 250
-            ) {
-
-                noiseStart = null;
-
-            }
-
-
-            if (isAwake) {
-
-                if (
-                    now - lastLoud >
-                    settings.sleepDelay
-                ) {
-
-                    goToSleep();
-
-                }
-
-            } else {
-
-                /*
-                 * Накопление тихого времени.
-                 */
-
-                quietSeconds += 1 / 60;
-
-                updateQuietMission();
-
-            }
-
-        }
-
-    }
-
-
-    animationFrame =
-        requestAnimationFrame(
-            listenLoop
-        );
-
-}
-
-
-/* =========================================================
-   SOUND LABEL
-   ========================================================= */
-
-function updateSoundText(level, loud) {
-
-    if (loud) {
-
-        soundValue.textContent =
-            "🔴 Шумно";
-
-    } else if (level > .35) {
-
-        soundValue.textContent =
-            "🟡 Немного шумно";
-
-    } else if (level > .12) {
-
-        soundValue.textContent =
-            "🟢 Нормально";
-
-    } else {
-
-        soundValue.textContent =
-            "💚 Тихо";
-
-    }
-
-}
-
-
-/* =========================================================
-   WAKE UP
-   ========================================================= */
-
-function wakeUp() {
-
-    if (isAwake) return;
-
-
-    isAwake = true;
-
-    wakeCounter++;
-
-    wakeCount.textContent =
-        wakeCounter;
-
-
-    monster.classList.remove("happy");
-
-    monster.classList.add("awake");
-
-    document.body.classList.add("awake");
-
-
-    speech.textContent =
-        "😡 Тише! Я проснулся!";
-
-
-    missionText.textContent =
-        "Помогаем монстрику снова уснуть";
-
-
-    playGrowl();
-
-}
-
-
-/* =========================================================
-   SLEEP
-   ========================================================= */
-
-function goToSleep() {
-
-    if (!isAwake) return;
-
-
-    isAwake = false;
-
-    monster.classList.remove("awake");
-
-    monster.classList.add("happy");
-
-    document.body.classList.remove("awake");
-
-
-    speech.textContent =
-        "🥱 Фух... спасибо! Снова сплю";
-
-
-    showReward(
-        "💚 Отлично! Монстрик снова спит"
-    );
-
-
-    createConfetti(18);
-
-
-    starCounter++;
-
-    starsCount.textContent =
-        starCounter;
-
-
-    missionText.textContent =
-        "Продолжаем тихий урок";
-
-
-    setTimeout(() => {
-
-        monster.classList.remove("happy");
-
-        speech.textContent =
-            "😴 Тихо... так держать!";
-
-    }, 3000);
-
-}
-
-
-/* =========================================================
-   QUIET MISSION
-   ========================================================= */
-
-function updateQuietMission() {
-
-    const currentMinute =
-        Math.floor(
-            quietSeconds
-        );
-
-
-    quietStreak.textContent =
-        currentMinute;
-
-
-    const progress =
-        (quietSeconds % 60) / 60 * 100;
-
-
-    missionProgress.style.width =
-        progress + "%";
-
-
-    /*
-     * Каждая полная тихая минута
-     * даёт звезду.
-     */
-
-    if (
-        currentMinute > 0 &&
-        currentMinute > lastMinuteReward
-    ) {
-
-        lastMinuteReward =
-            currentMinute;
-
-
-        starCounter++;
-
-        starsCount.textContent =
-            starCounter;
-
-
-        showReward(
-            "⭐ Тихая минута! +1 звезда"
-        );
-
-
-        createConfetti(12);
-
-
-        if (
-            currentMinute === 1
-        ) {
-
-            missionText.textContent =
-                "Первая тихая минута!";
-
-        } else {
-
-            missionText.textContent =
-                "Мы отлично справляемся!";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   GROWL
-   ========================================================= */
-
-function playGrowl() {
-
-    if (
-        !audioContext ||
-        settings.volume <= 0
-    ) return;
-
-
-    const t =
-        audioContext.currentTime;
-
-
-    const oscillator =
-        audioContext.createOscillator();
-
-
-    const gain =
-        audioContext.createGain();
-
-
-    const filter =
-        audioContext.createBiquadFilter();
-
-
-    oscillator.type =
-        "sawtooth";
-
-
-    oscillator.frequency.setValueAtTime(
-        125,
-        t
-    );
-
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        55,
-        t + 1
-    );
-
-
-    oscillator.frequency.linearRampToValueAtTime(
-        90,
-        t + 2
-    );
-
-
-    filter.type =
-        "lowpass";
-
-    filter.frequency.value =
-        750;
-
-
-    gain.gain.setValueAtTime(
-        .0001,
-        t
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        .15 * settings.volume,
-        t + .08
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        .0001,
-        t + 2.2
-    );
-
-
-    oscillator
-        .connect(filter)
-        .connect(gain)
-        .connect(
-            audioContext.destination
-        );
-
-
-    oscillator.start(t);
-
-    oscillator.stop(t + 2.25);
-
-}
-
-
-/* =========================================================
-   COOKIE
-   ========================================================= */
-
-function spawnCookie() {
-
-    cookie.classList.remove("hidden");
-
-    resetCookiePosition();
-
-}
-
-
-function resetCookiePosition() {
-
-    cookie.style.left = "";
-
-    cookie.style.top = "";
-
-    cookie.style.right = "-15px";
-
-    cookie.style.bottom = "0";
-
-}
-
-
-cookie.addEventListener(
-    "pointerdown",
-    event => {
-
-        if (isEating) return;
-
-
-        draggingCookie = true;
-
-
-        const rect =
-            cookie.getBoundingClientRect();
-
-
-        cookieOffsetX =
-            event.clientX -
-            rect.left;
-
-
-        cookieOffsetY =
-            event.clientY -
-            rect.top;
-
-
-        cookie.style.right = "auto";
-
-        cookie.style.bottom = "auto";
-
-
-        cookie.setPointerCapture(
-            event.pointerId
-        );
-
-
-        cookie.style.animation =
-            "none";
-
-    }
-);
-
-
-cookie.addEventListener(
-    "pointermove",
-    event => {
-
-        if (!draggingCookie) return;
-
-
-        cookie.style.left =
-            event.clientX -
-            cookieOffsetX +
-            "px";
-
-
-        cookie.style.top =
-            event.clientY -
-            cookieOffsetY +
-            "px";
-
-    }
-);
-
-
-cookie.addEventListener(
-    "pointerup",
-    () => {
-
-        if (!draggingCookie) return;
-
-
-        draggingCookie = false;
-
-
-        const cookieRect =
-            cookie.getBoundingClientRect();
-
-
-        const monsterRect =
-            monster.getBoundingClientRect();
-
-
-        const overlap =
-            cookieRect.left <
-                monsterRect.right &&
-
-            cookieRect.right >
-                monsterRect.left &&
-
-            cookieRect.top <
-                monsterRect.bottom &&
-
-            cookieRect.bottom >
-                monsterRect.top;
-
-
-        if (overlap) {
-
-            feedMonster();
-
-        } else {
-
-            cookie.style.animation =
-                "cookieFloat 2.2s ease-in-out infinite";
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   FEED MONSTER
-   ========================================================= */
-
-function feedMonster() {
-
-    if (isEating) return;
-
-
-    isEating = true;
-
-
-    const monsterRect =
-        monster.getBoundingClientRect();
-
-
-    const targetX =
-        monsterRect.left +
-        monsterRect.width / 2 -
-        45;
-
-
-    const targetY =
-        monsterRect.top +
-        monsterRect.height / 2 -
-        45;
-
-
-    cookie.style.transition =
-        "all .55s cubic-bezier(.4,0,.2,1)";
-
-
-    cookie.style.left =
-        targetX + "px";
-
-
-    cookie.style.top =
-        targetY + "px";
-
-
-    cookie.style.transform =
-        "scale(.25) rotate(720deg)";
-
-
-    setTimeout(() => {
-
-        cookie.classList.add("hidden");
-
-
-        cookie.style.transition =
-            "";
-
-        cookie.style.transform =
-            "";
-
-
-        if (isAwake) {
-
-            isAwake = false;
-
-            monster.classList.remove(
-                "awake"
-            );
-
-            document.body.classList.remove(
-                "awake"
-            );
-
-        }
-
-
-        monster.classList.add(
-            "happy"
-        );
-
-
-        speech.textContent =
-            "🍪 Ням! Спасибо!";
-
-
-        starCounter++;
-
-        starsCount.textContent =
-            starCounter;
-
-
-        showReward(
-            "🍪 Монстрик доволен! +1 звезда"
-        );
-
-
-        createConfetti(20);
-
-
-        setTimeout(() => {
-
-            monster.classList.remove(
-                "happy"
-            );
-
-            speech.textContent =
-                "😴 Теперь можно спать...";
-
-
-            setTimeout(() => {
-
-                isEating = false;
-
-                resetCookiePosition();
-
-                cookie.classList.remove(
-                    "hidden"
-                );
-
-                cookie.style.animation =
-                    "cookieFloat 2.2s ease-in-out infinite";
-
-            }, 1200);
-
-        }, 2200);
-
-    }, 600);
-
-}
-
-
-/* =========================================================
-   REWARD
-   ========================================================= */
-
-function showReward(text) {
-
-    reward.textContent =
-        text;
-
-
-    reward.classList.remove(
-        "show"
-    );
-
-
-    /*
-     * Перезапуск CSS-анимации.
-     */
-
-    void reward.offsetWidth;
-
-
-    reward.classList.add(
-        "show"
-    );
-
-}
-
-
-/* =========================================================
-   CONFETTI
-   ========================================================= */
-
-function createConfetti(count) {
-
-    const symbols = [
-        "⭐",
-        "✨",
-        "💚",
-        "🌟",
-        "🍀"
-    ];
-
-
-    for (
-        let i = 0;
-        i < count;
-        i++
-    ) {
-
-        const item =
-            document.createElement("div");
-
-
-        item.className =
-            "confetti";
-
-
-        item.textContent =
-            symbols[
-                Math.floor(
-                    Math.random() *
-                    symbols.length
-                )
-            ];
-
-
-        item.style.left =
-            Math.random() * 100 +
-            "vw";
-
-
-        item.style.fontSize =
-            10 +
-            Math.random() * 12 +
-            "px";
-
-
-        item.style.animationDelay =
-            Math.random() * .5 +
-            "s";
-
-
-        document.body.appendChild(
-            item
-        );
-
-
-        setTimeout(() => {
-
-            item.remove();
-
-        }, 2500);
-
-    }
-
-}
-
-
-/* =========================================================
-   INITIAL
-   ========================================================= */
-
 updateThresholdMarker();
 
-app.classList.add("hidden");
+/* ---------- Запуск ---------- */
+startBtn.addEventListener('click', async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
 
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    source   = audioCtx.createMediaStreamSource(stream);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = settings.gain;
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.5;
 
+    source.connect(gainNode).connect(analyser);
+    dataArray = new Uint8Array(analyser.fftSize);
+
+    startScreen.classList.add('hidden');
+    mainScreen.classList.remove('hidden');
+    spawnCookie();
+
+    // Автокалибровка 1 сек
+    isCalibrating = true;
+    statusEl.textContent = '🎤 Слушаю тишину… (не шумите)';
+    let samples = [];
+    const calStart = Date.now();
+    const calInterval = setInterval(() => {
+      analyser.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      samples.push(Math.sqrt(sum / dataArray.length));
+
+      if (Date.now() - calStart > 1000) {
+        clearInterval(calInterval);
+        samples.sort((a, b) => a - b);
+        const p80 = samples[Math.floor(samples.length * 0.8)] || 0;
+        settings.noiseFloor = p80 * 1.5;
+        calibBadge.textContent = 'фон ' + (p80 * 100).toFixed(1);
+        isCalibrating = false;
+        statusEl.textContent = '😴 Тихо… монстрик спит';
+        listenLoop();
+      }
+    }, 50);
+  } catch (err) {
+    alert('Не удалось получить доступ к микрофону.\n\n' + err.message);
+  }
+});
+
+/* ---------- Основной цикл ---------- */
+function listenLoop() {
+  analyser.getByteTimeDomainData(dataArray);
+
+  let sum = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    const v = (dataArray[i] - 128) / 128;
+    sum += v * v;
+  }
+  const rms = Math.sqrt(sum / dataArray.length);
+
+  const effectiveThreshold = Math.max(settings.threshold, settings.noiseFloor);
+
+  const displayLevel = Math.min(rms * 4, 1);
+  meterFill.style.width = (displayLevel * 100) + '%';
+
+  const now = Date.now();
+
+  if (!isEating) {
+    if (rms > effectiveThreshold) {
+      lastLoudTime = now;
+      if (noiseStartTime === null) noiseStartTime = now;
+      if (!isAwake && (now - noiseStartTime) >= settings.duration) wakeUp();
+    } else {
+      if (noiseStartTime !== null && now - lastLoudTime > 250) noiseStartTime = null;
+      if (isAwake && now - lastLoudTime > settings.sleepDelay) goToSleep();
+    }
+  }
+
+  animationId = requestAnimationFrame(listenLoop);
+}
+
+function wakeUp() {
+  isAwake = true;
+  monsterEl.classList.add('awake');
+  document.body.classList.add('awake');
+  statusEl.classList.add('awake');
+  statusEl.textContent = '😡 Тихо! Монстрик проснулся!';
+  playGrowl();
+}
+
+function goToSleep() {
+  isAwake = false;
+  monsterEl.classList.remove('awake');
+  document.body.classList.remove('awake');
+  statusEl.classList.remove('awake');
+  statusEl.textContent = '😴 Тихо… монстрик спит';
+}
+
+/* ============================================================
+   РЕАЛИСТИЧНЫЙ РЫК
+   Собирается из нескольких слоёв:
+   1) Низкий гул (sawtooth + sine, ноты ~55–85 Гц)
+   2) Модуляция vibrato (LFO на частоту)
+   3) Шум (белый шум через фильтр) — придаёт "хрип"
+   4) Формант-фильтр (band-pass ~200–500 Гц) — голосовой окрас
+   5) Огибающая: быстрая атака, sustain, плавное затухание
+   6) Второй "взрыкивающий" слой — короткий всплеск в начале
+   ============================================================ */
+function playGrowl() {
+  if (!audioCtx || settings.volume === 0) return;
+  const ctx = audioCtx;
+  const t = ctx.currentTime;
+  const duration = 3.0;
+  const vol = settings.volume;
+
+  // ---- Общая громкость ----
+  const masterGain = ctx.createGain();
+  masterGain.gain.setValueAtTime(0.0001, t);
+  masterGain.gain.exponentialRampToValueAtTime(0.9 * vol, t + 0.08);
+  masterGain.gain.setValueAtTime(0.85 * vol, t + duration - 0.4);
+  masterGain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  masterGain.connect(ctx.destination);
+
+  // ---- Формант-фильтр (голосовой тембр) ----
+  const formant1 = ctx.createBiquadFilter();
+  formant1.type = 'peaking';
+  formant1.frequency.value = 280;
+  formant1.Q.value = 2;
+  formant1.gain.value = 12;
+  formant1.connect(masterGain);
+
+  const formant2 = ctx.createBiquadFilter();
+  formant2.type = 'peaking';
+  formant2.frequency.value = 620;
+  formant2.Q.value = 3;
+  formant2.gain.value = 8;
+  formant2.connect(formant1);
+
+  const lowpass = ctx.createBiquadFilter();
+  lowpass.type = 'lowpass';
+  lowpass.frequency.value = 1400;
+  lowpass.Q.value = 0.7;
+  lowpass.connect(formant2);
+
+  // ---- Слой 1: основной низкий гул ----
+  const osc1 = ctx.createOscillator();
+  osc1.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(85, t);
+  osc1.frequency.linearRampToValueAtTime(62, t + 0.8);
+  osc1.frequency.linearRampToValueAtTime(78, t + 1.6);
+  osc1.frequency.linearRampToValueAtTime(55, t + 2.6);
+  osc1.frequency.linearRampToValueAtTime(70, t + duration);
+
+  const osc1Gain = ctx.createGain();
+  osc1Gain.gain.value = 0.55;
+  osc1.connect(osc1Gain).connect(lowpass);
+
+  // ---- Слой 2: суб-бас (sine, добавляет вес) ----
+  const osc2 = ctx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(55, t);
+  osc2.frequency.linearRampToValueAtTime(42, t + 1.4);
+  osc2.frequency.linearRampToValueAtTime(50, t + 2.6);
+  osc2.frequency.linearRampToValueAtTime(45, t + duration);
+
+  const osc2Gain = ctx.createGain();
+  osc2Gain.gain.value = 0.45;
+  osc2.connect(osc2Gain).connect(lowpass);
+
+  // ---- Vibrato (LFO на частоту обоих осцилляторов) ----
+  const lfo = ctx.createOscillator();
+  lfo.type = 'sine';
+  lfo.frequency.setValueAtTime(18, t);
+  lfo.frequency.linearRampToValueAtTime(28, t + duration);
+
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = 4;
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc1.frequency);
+  lfoGain.connect(osc2.frequency);
+
+  // ---- Слой 3: белый шум (хрип) ----
+  const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseData.length; i++) {
+    noiseData[i] = Math.random() * 2 - 1;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.value = 180;
+  noiseFilter.Q.value = 1.2;
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.value = 0.18;
+  noise.connect(noiseFilter).connect(noiseGain).connect(lowpass);
+
+  // ---- Слой 4: короткий "взрык" в самом начале ----
+  const burst = ctx.createOscillator();
+  burst.type = 'square';
+  burst.frequency.setValueAtTime(140, t);
+  burst.frequency.exponentialRampToValueAtTime(60, t + 0.25);
+
+  const burstGain = ctx.createGain();
+  burstGain.gain.setValueAtTime(0.5, t);
+  burstGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  burst.connect(burstGain).connect(lowpass);
+
+  // ---- Запуск ----
+  osc1.start(t); osc2.start(t); lfo.start(t); noise.start(t); burst.start(t);
+  osc1.stop(t + duration); osc2.stop(t + duration); lfo.stop(t + duration);
+  noise.stop(t + duration); burst.stop(t + 0.35);
+
+  // ---- Второй "рык" через 1.4 сек для эффекта "ррр-РРР" ----
+  setTimeout(() => {
+    if (!isAwake) return;
+    const t2 = ctx.currentTime;
+    const osc3 = ctx.createOscillator();
+    osc3.type = 'sawtooth';
+    osc3.frequency.setValueAtTime(100, t2);
+    osc3.frequency.exponentialRampToValueAtTime(55, t2 + 1.2);
+    const g3 = ctx.createGain();
+    g3.gain.setValueAtTime(0.0001, t2);
+    g3.gain.exponentialRampToValueAtTime(0.5 * vol, t2 + 0.06);
+    g3.gain.exponentialRampToValueAtTime(0.0001, t2 + 1.3);
+    osc3.connect(g3).connect(lowpass);
+    osc3.start(t2); osc3.stop(t2 + 1.35);
+  }, 1400);
+}
+
+/* ---------- Печенька ---------- */
+function spawnCookie() {
+  cookieEl.classList.remove('hidden');
+  cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+  cookieEl.style.top  = (window.innerHeight - 150) + 'px';
+
+  let dragging = false, offsetX = 0, offsetY = 0;
+
+  cookieEl.addEventListener('pointerdown', (e) => {
+    if (isEating) return;
+    dragging = true;
+    cookieEl.style.animation = 'none';
+    const r = cookieEl.getBoundingClientRect();
+    offsetX = e.clientX - r.left;
+    offsetY = e.clientY - r.top;
+    cookieEl.setPointerCapture(e.pointerId);
+  });
+
+  cookieEl.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    cookieEl.style.left = (e.clientX - offsetX) + 'px';
+    cookieEl.style.top  = (e.clientY - offsetY) + 'px';
+  });
+
+  cookieEl.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    const cR = cookieEl.getBoundingClientRect();
+    const mR = monsterEl.getBoundingClientRect();
+    const overlap =
+      cR.left < mR.right && cR.right > mR.left &&
+      cR.top < mR.bottom && cR.bottom > mR.top;
+    if (overlap) feedMonster();
+    else cookieEl.style.animation = '';
+  });
+}
+
+function feedMonster() {
+  if (isEating) return;
+  isEating = true;
+
+  const mR = monsterEl.getBoundingClientRect();
+  const targetX = mR.left + mR.width / 2 - 55;
+  const targetY = mR.top + mR.height / 2 - 55;
+
+  cookieEl.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+  cookieEl.style.left = targetX + 'px';
+  cookieEl.style.top  = targetY + 'px';
+  cookieEl.style.transform = 'scale(0.4) rotate(360deg)';
+
+  setTimeout(() => {
+    cookieEl.classList.add('hidden');
+    cookieEl.style.transition = '';
+    cookieEl.style.transform  = '';
+    showYum(targetX + 55, targetY);
+    spawnCrumbs(targetX + 55, targetY + 30);
+
+    isAwake = false;
+    monsterEl.classList.remove('awake');
+    document.body.classList.remove('awake');
+    statusEl.classList.remove('awake');
+    statusEl.textContent = '🍪 Ням-ням… монстрик доволен!';
+
+    setTimeout(() => {
+      statusEl.textContent = '😴 Тихо… монстрик спит';
+      isEating = false;
+      setTimeout(() => {
+        cookieEl.classList.remove('hidden');
+        cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+        cookieEl.style.top  = (window.innerHeight - 150) + 'px';
+        cookieEl.style.animation = '';
+      }, 1500);
+    }, 1800);
+  }, 550);
+}
+
+function showYum(x, y) {
+  const texts = ['Ням!', 'Мням-мням!', 'Вкусно!', 'Хрум!'];
+  const el = document.createElement('div');
+  el.className = 'yum';
+  el.textContent = texts[Math.floor(Math.random() * texts.length)];
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+
+function spawnCrumbs(x, y) {
+  for (let i = 0; i < 12; i++) {
+    const c = document.createElement('div');
+    c.className = 'crumb';
+    c.style.left = x + 'px';
+    c.style.top  = y + 'px';
+    document.body.appendChild(c);
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 40 + Math.random() * 80;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist + 40;
+    c.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+    ], {
+      duration: 900 + Math.random() * 400,
+      easing: 'cubic-bezier(0.3, 0, 0.7, 1)',
+      fill: 'forwards'
+    });
+    setTimeout(() => c.remove(), 1400);
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (cookieEl.classList.contains('hidden') || isEating) return;
+  cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+  cookieEl.style.top  = (window.innerHeight - 150) + 'px';
+});
 </script>
-
 </body>
 </html>
