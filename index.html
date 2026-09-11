@@ -2,1345 +2,993 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Монстрик — Хранитель Тишины</title>
+<title>Монстрик-Хранитель Тишины</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body {
-    width: 100%;
+  html, body {
     height: 100%;
     overflow: hidden;
-    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
     user-select: none;
-    color: #fff;
-    background: #0a0e1c;
-}
+  }
 
-#app {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    background: radial-gradient(circle at 50% 40%, #2a3a72 0%, #0d1226 70%);
-    transition: background 1.2s ease;
-}
-
-#app.warning {
-    background: radial-gradient(circle at 50% 40%, #6b3d4a 0%, #2a0810 70%);
-}
-
-#app.awake {
-    background: radial-gradient(circle at 50% 40%, #8b1a1a 0%, #2a0308 70%);
-}
-
-#stars {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.star {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    background: #fff;
-    border-radius: 50%;
-    animation: twinkle 3s infinite alternate;
-}
-
-@keyframes twinkle {
-    from { opacity: .2; transform: scale(.7); }
-    to   { opacity: 1;  transform: scale(1.3); }
-}
-
-#scene {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-}
-
-#scene canvas { display: block; }
-
-/* Верхняя панель */
-.topbar {
-    position: absolute;
-    top: 18px; left: 20px; right: 20px;
-    z-index: 20;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    pointer-events: none;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    width: 52px; height: 52px;
-    border-radius: 16px;
-    display: grid;
-    place-items: center;
-    font-size: 30px;
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.2);
-    backdrop-filter: blur(10px);
-}
-
-.logo-title { font-size: 20px; font-weight: 900; }
-.logo-sub   { font-size: 12px; opacity: .65; margin-top: 2px; }
-
-.stats { display: flex; gap: 10px; }
-
-.stat {
-    min-width: 110px;
-    padding: 10px 16px;
-    border-radius: 16px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.16);
-    backdrop-filter: blur(10px);
-    text-align: center;
-}
-
-.stat-label {
-    font-size: 11px;
-    opacity: .6;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-}
-
-.stat-value {
-    font-size: 22px;
-    font-weight: 900;
-    margin-top: 2px;
-}
-
-#starsCount { color: #ffd85c; }
-#wakeCount  { color: #ff8b6b; }
-
-/* Нижняя панель */
-.bottom-ui {
-    position: absolute;
-    z-index: 10;
-    left: 50%;
-    bottom: 22px;
-    transform: translateX(-50%);
-    width: min(660px, calc(100% - 40px));
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #3a1e6e 0%, #1a0f3d 60%, #0a0520 100%);
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.status-box {
-    padding: 14px 22px;
-    border-radius: 20px;
-    background: rgba(10,15,35,.75);
-    border: 1px solid rgba(255,255,255,.14);
-    backdrop-filter: blur(15px);
-    text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,.3);
-}
-
-.status-title { font-size: 24px; font-weight: 900; transition: color .4s ease; }
-.status-desc  { margin-top: 3px; font-size: 13px; opacity: .7; }
-
-.noise-panel {
-    padding: 14px 20px;
-    border-radius: 20px;
-    background: rgba(10,15,35,.75);
-    border: 1px solid rgba(255,255,255,.14);
-    backdrop-filter: blur(15px);
-}
-
-.noise-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-}
-
-.noise-title { font-weight: 800; font-size: 14px; }
-.noise-level { font-size: 13px; font-weight: 900; }
-
-.meter {
+    justify-content: center;
+    transition: background 1.2s ease;
     position: relative;
-    width: 100%;
-    height: 25px;
-    overflow: hidden;
-    border-radius: 20px;
-    background: rgba(255,255,255,.1);
-}
+  }
 
-.meter-fill {
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 0%;
-    border-radius: 20px;
-    background: linear-gradient(90deg, #51d88a 0%, #b7e34d 45%, #ffd34e 70%, #ff704f 100%);
-    transition: width .08s linear;
-}
+  body.awake {
+    background: radial-gradient(ellipse at 50% 30%, #6b1010 0%, #3a0505 60%, #150000 100%);
+  }
 
-.threshold {
-    position: absolute;
-    top: -4px; bottom: -4px;
-    left: 58%;
-    width: 4px;
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 0 12px rgba(255,255,255,.9);
-    transition: left .3s ease;
-    pointer-events: none;
-}
+  .stars {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(2px 2px at 60% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 80% 20%, #fff, transparent),
+      radial-gradient(2px 2px at 35% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 10% 60%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 45% 15%, #cbb4ff, transparent),
+      radial-gradient(1.5px 1.5px at 75% 85%, #cbb4ff, transparent);
+    opacity: 0.75;
+    animation: twinkle 4s infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: 0.4 } to { opacity: 0.95 } }
 
-.meter-labels {
+  .rage-vignette {
+    position: fixed; inset: 0; pointer-events: none;
+    box-shadow: inset 0 0 200px rgba(255,0,0,0);
+    transition: box-shadow 0.6s ease;
+    z-index: 3;
+  }
+  body.awake .rage-vignette {
+    box-shadow: inset 0 0 220px rgba(255,0,0,0.65);
+    animation: ragePulse 1.1s ease-in-out infinite;
+  }
+  @keyframes ragePulse {
+    0%,100% { box-shadow: inset 0 0 160px rgba(255,0,0,0.5); }
+    50%     { box-shadow: inset 0 0 280px rgba(255,0,0,0.9); }
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
     display: flex;
-    justify-content: space-between;
-    margin-top: 5px;
-    font-size: 10px;
-    opacity: .45;
-}
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
 
-/* Печенька */
-.cookie {
+  .monster {
+    position: relative;
+    width: 460px;
+    height: 520px;
+    animation: breathe 3.5s ease-in-out infinite;
+    filter: drop-shadow(0 25px 35px rgba(0,0,0,0.55));
+    transition: filter 0.8s ease;
+  }
+  @keyframes breathe {
+    0%,100% { transform: translateY(0) scale(1); }
+    50%     { transform: translateY(-12px) scale(1.03); }
+  }
+  .monster.awake {
+    animation: rageShake 0.25s ease-in-out infinite;
+    filter: drop-shadow(0 25px 45px rgba(255,60,60,0.85));
+  }
+  @keyframes rageShake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    20%     { transform: translate(-8px,-4px) rotate(-2.5deg); }
+    40%     { transform: translate(7px,-7px) rotate(2.5deg); }
+    60%     { transform: translate(-6px,-3px) rotate(-2deg); }
+    80%     { transform: translate(8px,-5px) rotate(3deg); }
+  }
+
+  .monster svg { width: 100%; height: 100%; overflow: visible; }
+
+  .body-gradient-stop-1 { transition: stop-color 0.8s ease; }
+  .body-gradient-stop-2 { transition: stop-color 0.8s ease; }
+  .body-gradient-stop-3 { transition: stop-color 0.8s ease; }
+  .horn-fill           { transition: fill 0.8s ease; }
+  .paw-fill            { transition: fill 0.8s ease; }
+
+  .pupil-group { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .monster.awake .pupil-group { transform: translateY(6px) scale(0.55); }
+
+  .eyelid { transform: translateY(-85px); transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1); }
+  .monster.awake .eyelid { transform: translateY(0); }
+
+  .mouth-sleep { transition: opacity 0.4s ease; }
+  .mouth-rage  { opacity: 0; transition: opacity 0.4s ease; }
+  .monster.awake .mouth-sleep { opacity: 0; }
+  .monster.awake .mouth-rage  { opacity: 1; }
+
+  .brow-group { opacity: 0; transition: opacity 0.35s ease; }
+  .monster.awake .brow-group { opacity: 1; }
+
+  .zzz {
+    position: absolute;
+    top: 40px; right: 20px;
+    font-size: 42px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 14px #a8d8ea, 0 0 25px #7597de;
+    opacity: 1;
+    animation: floatZ 2.5s ease-in-out infinite;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  @keyframes floatZ {
+    0%,100% { transform: translateY(0); opacity: 0.6; }
+    50%     { transform: translateY(-22px); opacity: 1; }
+  }
+  .monster.awake .zzz { opacity: 0; }
+
+  .steam {
+    position: absolute;
+    top: 235px;
+    width: 48px; height: 48px;
+    background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,180,180,0) 70%);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .steam.left  { left: 100px; }
+  .steam.right { right: 100px; }
+  .monster.awake .steam { animation: steamPuff 1.3s ease-out infinite; }
+  .monster.awake .steam.right { animation-delay: 0.65s; }
+  @keyframes steamPuff {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    30%  { opacity: 0.95; transform: translateY(-25px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-75px) scale(2); }
+  }
+
+  .lightning {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 15px #ffe066) drop-shadow(0 0 25px #ffb300);
+    z-index: 5;
+  }
+  .lightning svg { display: block; }
+  .lightning.l1 { top: 10px;  left: -40px;  }
+  .lightning.l2 { top: 40px;  right: -45px; }
+  .lightning.l3 { bottom: 90px; left: -35px;  }
+  .lightning.l4 { bottom: 60px; right: -35px; }
+  .monster.awake .lightning { animation: zap 0.95s ease-in-out infinite; }
+  .monster.awake .lightning.l2 { animation-delay: 0.24s; }
+  .monster.awake .lightning.l3 { animation-delay: 0.48s; }
+  .monster.awake .lightning.l4 { animation-delay: 0.72s; }
+  @keyframes zap {
+    0%,70%,100% { opacity: 0; transform: scale(0.7); }
+    74%,86%     { opacity: 1; transform: scale(1.25); }
+  }
+
+  .vein { opacity: 0; transition: opacity 0.4s ease; }
+  .monster.awake .vein { opacity: 1; animation: veinPulse 1s infinite; }
+  @keyframes veinPulse { 0%,100% { opacity: 0.45 } 50% { opacity: 1 } }
+
+  .cookie {
     position: fixed;
-    width: 100px;
-    height: 100px;
-    z-index: 30;
+    width: 110px; height: 110px;
     cursor: grab;
-    filter: drop-shadow(0 12px 20px rgba(0,0,0,.5));
-    transition: transform .2s ease;
-    animation: cookieFloat 2.4s ease-in-out infinite;
-    touch-action: none;
-}
-
-@keyframes cookieFloat {
+    z-index: 100;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
+    animation: cookieFloat 2.2s ease-in-out infinite;
+  }
+  @keyframes cookieFloat {
     0%,100% { transform: translateY(0) rotate(-4deg); }
     50%     { transform: translateY(-10px) rotate(4deg); }
-}
+  }
+  .cookie:active { cursor: grabbing; }
+  .cookie.hidden { display: none; }
 
-.cookie:hover { transform: scale(1.08); }
-.cookie.dragging {
-    cursor: grabbing;
-    transform: scale(1.15) rotate(-8deg);
-    animation: none;
-}
-
-.cookie.hidden { display: none; }
-
-.cookie.hint {
-    animation: cookiePulse 1.2s ease-in-out infinite;
-}
-
-@keyframes cookiePulse {
-    0%,100% { transform: scale(1) rotate(-4deg); filter: drop-shadow(0 12px 20px rgba(0,0,0,.5)); }
-    50%     { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 12px 30px rgba(255,215,80,.9)); }
-}
-
-.crumb {
+  .crumb {
     position: fixed;
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     background: #c98b3c;
     border-radius: 50%;
     pointer-events: none;
     z-index: 99;
-}
+  }
 
-.yum {
+  .yum {
     position: fixed;
     font-size: 36px;
-    font-weight: 900;
+    font-weight: bold;
     color: #fff;
-    text-shadow: 0 2px 10px rgba(0,0,0,.7), 0 0 20px #ffb300;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7), 0 0 20px #ffb300;
     pointer-events: none;
     z-index: 200;
-    animation: yumFloat 1.7s ease-out forwards;
-}
-
-@keyframes yumFloat {
-    0%   { opacity: 0; transform: translateY(0) scale(.5); }
+    animation: yumFloat 1.6s ease-out forwards;
+  }
+  @keyframes yumFloat {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
     20%  { opacity: 1; transform: translateY(-20px) scale(1.25); }
     100% { opacity: 0; transform: translateY(-95px) scale(1); }
-}
+  }
 
-/* Стартовый экран */
-.start-screen {
+  .meter {
+    width: 420px; height: 26px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.35);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .meter-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #4caf50, #ffeb3b, #ff5722);
+    border-radius: 20px;
+    transition: width 0.08s linear;
+    box-shadow: 0 0 12px rgba(255,255,255,0.4);
+  }
+  .meter-threshold {
     position: absolute;
-    z-index: 50;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(7,10,25,.7);
-    backdrop-filter: blur(6px);
-    transition: opacity .5s ease;
-}
+    top: -3px; bottom: -3px;
+    width: 3px;
+    background: #fff;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+    transition: left 0.3s ease;
+  }
 
-.start-screen.hidden { opacity: 0; pointer-events: none; }
-
-.start-card {
-    width: min(560px, calc(100% - 30px));
-    padding: 38px 34px;
-    border-radius: 30px;
-    background: rgba(18,24,52,.95);
-    border: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  .status {
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+    font-weight: bold;
+    letter-spacing: 1px;
     text-align: center;
-}
+    transition: color 0.4s ease;
+  }
+  .status.awake { color: #ffe0b2; text-shadow: 0 0 20px rgba(255,80,80,0.8); }
 
-.start-monster {
-    font-size: 90px;
-    margin-bottom: 12px;
-    animation: startFloat 2.2s ease-in-out infinite;
-    display: inline-block;
-}
-
-@keyframes startFloat {
-    0%,100% { transform: translateY(0) rotate(-3deg); }
-    50%     { transform: translateY(-12px) rotate(3deg); }
-}
-
-.start-card h1 { font-size: 32px; font-weight: 900; margin-bottom: 14px; }
-
-.start-card p {
-    line-height: 1.6;
-    color: rgba(255,255,255,.75);
-    font-size: 15px;
-}
-
-.start-button {
-    margin-top: 26px;
-    border: 0;
-    padding: 18px 42px;
-    border-radius: 18px;
+  .start-btn {
+    padding: 22px 52px;
+    font-size: 26px;
+    font-family: inherit; font-weight: bold;
     color: #fff;
-    font-family: inherit;
-    font-size: 18px;
-    font-weight: 900;
+    background: linear-gradient(135deg, #ff9800, #f44336);
+    border: none; border-radius: 50px;
     cursor: pointer;
-    background: linear-gradient(135deg, #6c63ff, #4d8dff);
-    box-shadow: 0 10px 30px rgba(73,105,255,.4);
-    transition: transform .2s, box-shadow .2s;
-}
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5), 0 0 30px rgba(255,152,0,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .start-btn:hover  { transform: translateY(-3px) scale(1.05); box-shadow: 0 14px 35px rgba(0,0,0,0.6), 0 0 40px rgba(255,152,0,0.6); }
+  .start-btn:active { transform: scale(0.97); }
 
-.start-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(73,105,255,.6);
-}
+  .hint {
+    color: #fff; opacity: 0.85;
+    font-size: 16px; text-align: center;
+    max-width: 500px; line-height: 1.55;
+  }
 
-/* Настройки */
-.settings-btn {
-    position: absolute;
-    right: 20px; bottom: 20px;
-    z-index: 25;
-    width: 48px; height: 48px;
-    border-radius: 14px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15);
-    color: #fff;
-    font-size: 22px;
+  .hidden { display: none !important; }
+
+  .settings-toggle {
+    position: fixed; top: 20px; right: 20px;
+    width: 58px; height: 58px;
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    color: #fff; font-size: 28px;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: background .2s;
-}
+    backdrop-filter: blur(8px);
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s, background 0.2s;
+  }
+  .settings-toggle:hover { background: rgba(255,255,255,0.32); transform: rotate(45deg); }
 
-.settings-btn:hover { background: rgba(255,255,255,.2); }
-
-.settings {
-    position: absolute;
-    z-index: 35;
-    right: 20px; bottom: 78px;
-    width: 320px;
-    padding: 22px;
+  .settings-panel {
+    position: fixed; top: 92px; right: 20px;
+    width: 350px;
+    max-height: 78vh;
+    overflow-y: auto;
+    background: rgba(15,15,30,0.95);
+    border: 2px solid rgba(255,255,255,0.2);
     border-radius: 22px;
-    background: rgba(15,19,42,.96);
-    border: 1px solid rgba(255,255,255,.15);
-    box-shadow: 0 20px 60px rgba(0,0,0,.6);
-    backdrop-filter: blur(20px);
-    transform: translateY(15px);
+    padding: 24px;
+    color: #fff;
+    backdrop-filter: blur(12px);
+    z-index: 49;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    transform: translateY(-15px);
     opacity: 0;
     pointer-events: none;
-    transition: all .3s ease;
-}
-
-.settings.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.settings h3 { margin-bottom: 18px; font-size: 17px; }
-
-.setting { margin-bottom: 18px; }
-
-.setting label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 7px;
-    font-size: 13px;
-}
-
-.setting label b { color: #ffd54f; }
-
-.setting input { width: 100%; accent-color: #6c63ff; }
-
-.setting small {
+    transition: all 0.3s ease;
+  }
+  .settings-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .settings-panel h3 {
+    font-size: 20px;
+    margin-bottom: 18px;
+    color: #ffd54f;
+    text-align: center;
+    text-shadow: 0 0 12px rgba(255,213,79,0.5);
+  }
+  .setting { margin-bottom: 20px; }
+  .setting label {
     display: block;
-    margin-top: 5px;
-    color: rgba(255,255,255,.45);
-    line-height: 1.4;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #e0e0e0;
+  }
+  .setting .value {
+    float: right;
+    color: #ffd54f;
+    font-weight: bold;
+  }
+  .setting input[type="range"] {
+    width: 100%;
+    accent-color: #ff9800;
+    cursor: pointer;
+  }
+  .setting .desc {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .calib-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    background: rgba(76,175,80,0.3);
+    border-radius: 10px;
     font-size: 11px;
-}
-
-@media (max-width: 700px) {
-    .topbar { top: 10px; left: 10px; right: 10px; }
-    .logo-sub { display: none; }
-    .logo-title { font-size: 16px; }
-    .stat { min-width: 75px; padding: 7px 8px; }
-    .stat-value { font-size: 17px; }
-    .bottom-ui { bottom: 10px; }
-    .status-title { font-size: 19px; }
-    .start-card { padding: 25px; }
-    .start-card h1 { font-size: 26px; }
-    .settings { right: 10px; bottom: 70px; width: calc(100% - 20px); }
-}
+    color: #a5d6a7;
+    margin-left: 6px;
+  }
 </style>
 </head>
 <body>
 
-<div id="app">
-    <div id="stars"></div>
-    <div id="scene"></div>
+<div class="stars"></div>
+<div class="rage-vignette"></div>
 
-    <!-- Верхняя панель -->
-    <div class="topbar">
-        <div class="logo">
-            <div class="logo-icon">👾</div>
-            <div>
-                <div class="logo-title">Хранитель Тишины</div>
-                <div class="logo-sub">Спокойный класс — довольный монстр</div>
-            </div>
-        </div>
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-label">Просыпался</div>
-                <div class="stat-value" id="wakeCount">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">⭐ Тихо</div>
-                <div class="stat-value" id="starsCount">0:00</div>
-            </div>
-        </div>
-    </div>
+<button class="settings-toggle" id="settingsToggle" title="Настройки">⚙</button>
 
-    <!-- Нижняя панель -->
-    <div class="bottom-ui">
-        <div class="status-box">
-            <div class="status-title" id="statusTitle">😴 Монстрик спит</div>
-            <div class="status-desc" id="statusDesc">Тишина помогает ему видеть хорошие сны</div>
-        </div>
+<div class="settings-panel" id="settingsPanel">
+  <h3>⚙ Настройки монстрика</h3>
 
-        <div class="noise-panel">
-            <div class="noise-header">
-                <div class="noise-title">🎤 Уровень шума</div>
-                <div class="noise-level" id="noiseLevel">Тихо</div>
-            </div>
-            <div class="meter">
-                <div class="meter-fill" id="meterFill"></div>
-                <div class="threshold" id="threshold"></div>
-            </div>
-            <div class="meter-labels">
-                <span>🤫 ТИШИНА</span>
-                <span>🙂 НОРМА</span>
-                <span>😡 ГРОМКО</span>
-            </div>
-        </div>
-    </div>
+  <div class="setting">
+    <label>🎤 Усиление микрофона <span class="value" id="gainVal">10x</span></label>
+    <input type="range" id="gainRange" min="1" max="40" value="10">
+    <span class="desc">Если монстр не слышит класс — поднимайте. Для тихого микрофона ставьте 20–30x.</span>
+  </div>
 
-    <!-- Печенька -->
-    <svg id="cookie" class="cookie hidden" viewBox="0 0 100 100">
-        <defs>
-            <radialGradient id="cookieGradient" cx="35%" cy="30%">
-                <stop offset="0%" stop-color="#ffe0a3"/>
-                <stop offset="70%" stop-color="#d99443"/>
-                <stop offset="100%" stop-color="#8c511f"/>
-            </radialGradient>
-        </defs>
-        <circle cx="50" cy="50" r="45" fill="url(#cookieGradient)" stroke="#63370f" stroke-width="4"/>
-        <circle cx="28" cy="32" r="6" fill="#61330f"/>
-        <circle cx="62" cy="28" r="5" fill="#61330f"/>
-        <circle cx="72" cy="52" r="6" fill="#61330f"/>
-        <circle cx="42" cy="55" r="5" fill="#61330f"/>
-        <circle cx="27" cy="72" r="5" fill="#61330f"/>
-        <circle cx="58" cy="75" r="6" fill="#61330f"/>
-        <circle cx="50" cy="18" r="4" fill="#61330f"/>
-        <ellipse cx="35" cy="22" rx="12" ry="7" fill="rgba(255,255,255,.35)"/>
-    </svg>
+  <div class="setting">
+    <label>🔊 Порог громкости <span class="value" id="thresholdVal">5</span></label>
+    <input type="range" id="thresholdRange" min="1" max="40" value="5">
+    <span class="desc">Меньше — чувствительнее. Калибровка <span class="calib-badge" id="calibBadge">—</span></span>
+  </div>
 
-    <!-- Старт -->
-    <div class="start-screen" id="startScreen">
-        <div class="start-card">
-            <div class="start-monster">👾</div>
-            <h1>Хранитель Тишины</h1>
-            <p>
-                Этот монстрик очень любит спать.<br>
-                Если в классе становится слишком громко — он просыпается и злится.<br><br>
-                Сохраняйте тишину, чтобы он досмотрел сон.<br>
-                Если разбудили — дайте ему печеньку 🍪
-            </p>
-            <button class="start-button" id="startButton">🎤 Начать урок</button>
-        </div>
-    </div>
+  <div class="setting">
+    <label>⏱ Длительность шума <span class="value" id="durationVal">0.6 с</span></label>
+    <input type="range" id="durationRange" min="0" max="30" value="6">
+    <span class="desc">0 — мгновенно на резкий звук. 2–3 сек — ловит продолжительный бубнёж.</span>
+  </div>
 
-    <!-- Настройки -->
-    <button class="settings-btn" id="settingsButton">⚙️</button>
-    <div class="settings" id="settings">
-        <h3>⚙️ Настройки</h3>
+  <div class="setting">
+    <label>😴 Время успокоения <span class="value" id="sleepVal">8 с</span></label>
+    <input type="range" id="sleepRange" min="3" max="20" value="8">
+    <span class="desc">Сколько должно быть тихо, чтобы монстр сам заснул.</span>
+  </div>
 
-        <div class="setting">
-            <label>🎤 Усиление микрофона <b id="gainVal">8x</b></label>
-            <input type="range" id="gain" min="1" max="40" step="1" value="8">
-            <small>Если монстр не слышит класс — поднимайте. Для тихого микрофона 20–30x.</small>
-        </div>
-
-        <div class="setting">
-            <label>🔊 Порог громкости <b id="sensitivityVal">5</b></label>
-            <input type="range" id="sensitivity" min="1" max="40" step="1" value="5">
-            <small>Меньше — чувствительнее.</small>
-        </div>
-
-        <div class="setting">
-            <label>⏱ Длительность шума <b id="wakeVal">2 сек</b></label>
-            <input type="range" id="wakeDelay" min="0" max="10" step="1" value="2">
-            <small>0 — мгновенно. 2–3 сек — ловит продолжительный бубнёж.</small>
-        </div>
-
-        <div class="setting">
-            <label>😴 Время успокоения <b id="sleepVal">8 сек</b></label>
-            <input type="range" id="sleepDelay" min="3" max="20" step="1" value="8">
-            <small>Сколько тишины нужно, чтобы монстр сам заснул.</small>
-        </div>
-
-        <div class="setting">
-            <label>🔈 Громкость рыка <b id="volumeVal">70</b></label>
-            <input type="range" id="volume" min="0" max="100" step="5" value="70">
-            <small>Громкость звука при пробуждении.</small>
-        </div>
-    </div>
+  <div class="setting">
+    <label>🔈 Громкость рыка <span class="value" id="volumeVal">70</span></label>
+    <input type="range" id="volumeRange" min="0" max="100" value="70">
+    <span class="desc">Громкость рыка при пробуждении.</span>
+  </div>
 </div>
 
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+<div id="startScreen" class="stage">
+  <div style="font-size:110px; filter: drop-shadow(0 0 25px rgba(120,200,255,0.6));">👾</div>
+  <h1 style="color:#fff;font-size:36px;text-shadow:0 2px 15px rgba(0,0,0,0.6);">Монстрик-Хранитель Тишины</h1>
+  <p class="hint">
+    Нажми кнопку и разреши доступ к микрофону.<br>
+    Первую секунду монстрик слушает тишину, чтобы откалиброваться — не шуми.<br>
+    Чтобы успокоить монстра — <b>перетащи печеньку 🍪 на него</b>.
+  </p>
+  <button class="start-btn" id="startBtn">▶ Запустить монстрика</button>
+</div>
 
+<div id="mainScreen" class="stage hidden">
+  <div class="status" id="status">😴 Тихо… монстрик спит</div>
+
+  <div class="monster" id="monster">
+
+    <div class="lightning l1">
+      <svg width="50" height="70" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l2">
+      <svg width="50" height="70" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l3">
+      <svg width="42" height="60" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+    <div class="lightning l4">
+      <svg width="42" height="60" viewBox="0 0 50 70"><path d="M28 0 L10 38 L22 38 L16 70 L42 26 L28 26 Z" fill="#ffe066" stroke="#ffb300" stroke-width="2"/></svg>
+    </div>
+
+    <div class="steam left"></div>
+    <div class="steam right"></div>
+
+    <svg viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bodyGrad" cx="38%" cy="32%" r="75%">
+          <stop class="body-gradient-stop-1" offset="0%"   stop-color="#b8ffb8"/>
+          <stop class="body-gradient-stop-2" offset="55%"  stop-color="#4caf50"/>
+          <stop class="body-gradient-stop-3" offset="100%" stop-color="#1b5e20"/>
+        </radialGradient>
+        <radialGradient id="bodyShade" cx="70%" cy="80%" r="70%">
+          <stop offset="0%" stop-color="rgba(0,0,0,0.4)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+        <!-- Новое: градиент для век/тени вокруг глаза -->
+        <radialGradient id="eyeSocket" cx="50%" cy="50%">
+          <stop offset="60%" stop-color="rgba(0,0,0,0)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0.25)"/>
+        </radialGradient>
+        <!-- Новое: градиент рога — от костяного к тёмному -->
+        <linearGradient id="hornGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"  stop-color="#fff8e0"/>
+          <stop offset="35%" stop-color="#e8d9a8"/>
+          <stop offset="70%" stop-color="#a89668"/>
+          <stop offset="100%" stop-color="#5d4f2e"/>
+        </linearGradient>
+        <!-- Новое: градиент для лап (снизу тёмнее) -->
+        <linearGradient id="pawGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"  stop-color="#4caf50"/>
+          <stop offset="100%" stop-color="#1b5e20"/>
+        </linearGradient>
+        <!-- Новое: градиент для когтей -->
+        <linearGradient id="clawGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"  stop-color="#fffef2"/>
+          <stop offset="100%" stop-color="#b8b096"/>
+        </linearGradient>
+        <radialGradient id="eyeGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#d8ecd8"/>
+        </radialGradient>
+        <radialGradient id="irisGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ffd54f"/>
+          <stop offset="50%" stop-color="#f57c00"/>
+          <stop offset="100%" stop-color="#3e1f00"/>
+        </radialGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Новое: мягкое свечение под телом -->
+        <radialGradient id="groundGlow" cx="50%" cy="50%">
+          <stop offset="0%"  stop-color="rgba(120,200,255,0.35)"/>
+          <stop offset="100%" stop-color="rgba(120,200,255,0)"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Свечение на полу -->
+      <ellipse cx="230" cy="500" rx="200" ry="40" fill="url(#groundGlow)"/>
+
+      <!-- Тень на полу -->
+      <ellipse cx="230" cy="500" rx="160" ry="18" fill="rgba(0,0,0,0.35)"/>
+
+      <!-- РОГА -->
+      <path class="horn-fill" d="M 118 130 Q 95 60 115 20 Q 130 40 140 85 Q 148 110 142 135 Z" fill="url(#hornGrad)" stroke="#3e3e26" stroke-width="2"/>
+      <path class="horn-fill" d="M 342 130 Q 365 60 345 20 Q 330 40 320 85 Q 312 110 318 135 Z" fill="url(#hornGrad)" stroke="#3e3e26" stroke-width="2"/>
+      <!-- Новое: блики на рогах -->
+      <path d="M 122 100 Q 118 60 125 35" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M 338 100 Q 342 60 335 35" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+      <!-- ТЕЛО -->
+      <path d="M 230 145
+               Q 110 145 95 270
+               Q 85 400 160 455
+               Q 230 485 300 455
+               Q 375 400 365 270
+               Q 350 145 230 145 Z"
+            fill="url(#bodyGrad)" stroke="#1b5e20" stroke-width="3"/>
+      <path d="M 230 145
+               Q 110 145 95 270
+               Q 85 400 160 455
+               Q 230 485 300 455
+               Q 375 400 365 270
+               Q 350 145 230 145 Z"
+            fill="url(#bodyShade)"/>
+
+      <!-- Новое: мягкий блик сверху тела -->
+      <ellipse cx="200" cy="205" rx="55" ry="35" fill="rgba(255,255,255,0.16)" transform="rotate(-15 200 205)"/>
+
+      <!-- ПЯТНЫШКИ -->
+      <circle cx="150" cy="250" r="22" fill="rgba(255,255,255,0.28)"/>
+      <circle cx="130" cy="320" r="14" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="310" cy="300" r="28" fill="rgba(255,255,255,0.28)"/>
+      <circle cx="330" cy="380" r="16" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="180" cy="400" r="18" fill="rgba(255,255,255,0.25)"/>
+      <circle cx="270" cy="430" r="12" fill="rgba(255,255,255,0.22)"/>
+
+      <!-- ВЕНЫ -->
+      <g class="vein" stroke="#7a0000" stroke-width="4" stroke-linecap="round" fill="none">
+        <path d="M 140 280 Q 155 300 150 330"/>
+        <path d="M 320 270 Q 305 300 315 340"/>
+        <path d="M 200 420 Q 215 400 235 415"/>
+        <path d="M 285 430 Q 275 405 255 425"/>
+      </g>
+
+      <!-- ЛАПЫ -->
+      <ellipse class="paw-fill" cx="140" cy="470" rx="55" ry="30" fill="url(#pawGrad)" stroke="#1b5e20" stroke-width="3"/>
+      <ellipse class="paw-fill" cx="320" cy="470" rx="55" ry="30" fill="url(#pawGrad)" stroke="#1b5e20" stroke-width="3"/>
+
+      <!-- Новое: когти (по три на каждой лапе, с градиентом) -->
+      <path d="M 100 470 L 90 485 L 105 478 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 118 468 L 112 487 L 126 478 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 138 466 L 132 486 L 148 476 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 360 470 L 370 485 L 355 478 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 342 468 L 348 487 L 334 478 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+      <path d="M 322 466 L 328 486 L 312 476 Z" fill="url(#clawGrad)" stroke="#3e3e26" stroke-width="1.5"/>
+
+      <!-- ГЛАЗ -->
+      <g>
+        <!-- Новое: тёмная глазница для объёма -->
+        <ellipse cx="230" cy="265" rx="92" ry="98" fill="rgba(0,0,0,0.35)"/>
+        <ellipse cx="230" cy="265" rx="82" ry="88" fill="#1b3a1b" stroke="#0d1f0d" stroke-width="3"/>
+        <ellipse cx="230" cy="265" rx="72" ry="78" fill="url(#eyeGrad)" stroke="#0d1f0d" stroke-width="2"/>
+
+        <!-- Новое: сеть капилляров в белке (тонкие линии) -->
+        <g opacity="0.35" stroke="#c05050" stroke-width="0.7" fill="none">
+          <path d="M 175 220 Q 185 235 178 250"/>
+          <path d="M 285 220 Q 275 235 282 250"/>
+          <path d="M 170 290 Q 185 285 195 295"/>
+          <path d="M 290 290 Q 275 285 265 295"/>
+        </g>
+
+        <g class="pupil-group" style="transform-origin: 230px 265px;">
+          <circle cx="230" cy="265" r="30" fill="url(#irisGrad)"/>
+          <circle cx="230" cy="265" r="16" fill="#0a0a0a"/>
+          <circle cx="222" cy="256" r="6" fill="#fff" opacity="0.95"/>
+          <circle cx="240" cy="278" r="3" fill="#fff" opacity="0.7"/>
+          <!-- Новое: тонкое кольцо вокруг радужки -->
+          <circle cx="230" cy="265" r="30" fill="none" stroke="#1a0d00" stroke-width="1.5" opacity="0.6"/>
+        </g>
+
+        <path class="eyelid"
+              d="M 148 265 Q 230 145 312 265 Q 230 265 148 265 Z"
+              fill="#4caf50" stroke="#1b5e20" stroke-width="2"/>
+
+        <g class="eyelid" style="transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1);">
+          <path d="M 175 195 Q 165 180 155 185" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 230 175 L 230 158" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 285 195 Q 295 180 305 185" stroke="#0d1f0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- БРОВИ -->
+      <g class="brow-group">
+        <path d="M 155 210 Q 180 195 205 205" stroke="#2b0000" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M 305 210 Q 280 195 255 205" stroke="#2b0000" stroke-width="9" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- РОТ: улыбка во сне -->
+      <g class="mouth-sleep">
+        <path d="M 195 360 Q 230 385 265 360" stroke="#1b3a1b" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="195" cy="360" r="3" fill="#1b3a1b"/>
+        <circle cx="265" cy="360" r="3" fill="#1b3a1b"/>
+        <!-- Новое: два маленьких клычка даже во сне (снизу) -->
+        <path d="M 210 372 L 214 380 L 218 372 Z" fill="#fff" stroke="#1b3a1b" stroke-width="0.8"/>
+        <path d="M 242 372 L 246 380 L 250 372 Z" fill="#fff" stroke="#1b3a1b" stroke-width="0.8"/>
+      </g>
+
+      <!-- РОТ: оскал при злости -->
+      <g class="mouth-rage">
+        <path d="M 175 350 Q 230 430 285 350 Q 230 375 175 350 Z"
+              fill="#3b0000" stroke="#1b3a1b" stroke-width="3"/>
+        <path d="M 190 352 L 200 380 L 210 352 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 215 350 L 225 385 L 235 350 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 240 350 L 250 385 L 260 350 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 265 352 L 275 380 L 285 352 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 200 380 L 208 360 L 216 380 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <path d="M 245 380 L 253 360 L 261 380 Z" fill="#fff" stroke="#3e3e26" stroke-width="1"/>
+        <ellipse cx="230" cy="400" rx="18" ry="10" fill="#d32f2f"/>
+      </g>
+
+      <!-- НОЗДРИ -->
+      <ellipse cx="210" cy="330" rx="5" ry="4" fill="#1b3a1b" opacity="0.6"/>
+      <ellipse cx="250" cy="330" rx="5" ry="4" fill="#1b3a1b" opacity="0.6"/>
+
+      <ellipse cx="180" cy="200" rx="30" ry="45" fill="rgba(255,255,255,0.18)" transform="rotate(-25 180 200)"/>
+    </svg>
+
+    <div class="zzz">Z z z</div>
+  </div>
+
+  <div class="meter">
+    <div class="meter-fill" id="meterFill"></div>
+    <div class="meter-threshold" id="meterThreshold"></div>
+  </div>
+</div>
+
+<svg class="cookie hidden" id="cookie" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="cookieGrad" cx="40%" cy="35%">
+      <stop offset="0%"  stop-color="#f0c078"/>
+      <stop offset="55%" stop-color="#c98b3c"/>
+      <stop offset="100%" stop-color="#7a4a12"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" fill="url(#cookieGrad)" stroke="#5a3208" stroke-width="3"/>
+  <circle cx="35" cy="35" r="6" fill="#3a1e00"/>
+  <circle cx="65" cy="30" r="5" fill="#3a1e00"/>
+  <circle cx="30" cy="60" r="5" fill="#3a1e00"/>
+  <circle cx="55" cy="55" r="6" fill="#3a1e00"/>
+  <circle cx="70" cy="65" r="5" fill="#3a1e00"/>
+  <circle cx="45" cy="75" r="5" fill="#3a1e00"/>
+  <circle cx="75" cy="45" r="4" fill="#3a1e00"/>
+  <circle cx="20" cy="45" r="4" fill="#3a1e00"/>
+  <circle cx="50" cy="20" r="3" fill="#3a1e00"/>
+  <ellipse cx="35" cy="25" rx="10" ry="6" fill="rgba(255,255,255,0.35)"/>
+</svg>
+
+<script>
 /* ============================================================
-   DOM
-============================================================ */
-const app            = document.getElementById('app');
-const sceneContainer = document.getElementById('scene');
-const startScreen    = document.getElementById('startScreen');
-const startButton    = document.getElementById('startButton');
-const statusTitle    = document.getElementById('statusTitle');
-const statusDesc     = document.getElementById('statusDesc');
-const meterFill      = document.getElementById('meterFill');
-const noiseLevel     = document.getElementById('noiseLevel');
-const thresholdEl    = document.getElementById('threshold');
-const wakeCountEl    = document.getElementById('wakeCount');
-const starsCountEl   = document.getElementById('starsCount');
-const cookieEl       = document.getElementById('cookie');
-const settingsBtn    = document.getElementById('settingsButton');
-const settingsPanel  = document.getElementById('settings');
-const gainSlider     = document.getElementById('gain');
-const sensSlider     = document.getElementById('sensitivity');
-const wakeSlider     = document.getElementById('wakeDelay');
-const sleepSlider    = document.getElementById('sleepDelay');
-const volumeSlider   = document.getElementById('volume');
-const gainVal        = document.getElementById('gainVal');
-const sensVal        = document.getElementById('sensitivityVal');
-const wakeVal        = document.getElementById('wakeVal');
-const sleepVal       = document.getElementById('sleepVal');
-const volumeVal      = document.getElementById('volumeVal');
+   МОНСТРИК v4.1 — крутой SVG + рык из файла roar.mp3
+   ============================================================ */
 
-/* ============================================================
-   Звёзды на фоне
-============================================================ */
-for (let i = 0; i < 90; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top  = Math.random() * 100 + '%';
-    star.style.animationDelay = Math.random() * 3 + 's';
-    star.style.width  = (2 + Math.random() * 2) + 'px';
-    star.style.height = star.style.width;
-    document.getElementById('stars').appendChild(star);
-}
+const startScreen   = document.getElementById('startScreen');
+const mainScreen    = document.getElementById('mainScreen');
+const startBtn      = document.getElementById('startBtn');
+const monsterEl     = document.getElementById('monster');
+const meterFill     = document.getElementById('meterFill');
+const meterThreshold= document.getElementById('meterThreshold');
+const statusEl      = document.getElementById('status');
+const cookieEl      = document.getElementById('cookie');
+const calibBadge    = document.getElementById('calibBadge');
 
-/* ============================================================
-   THREE.JS
-============================================================ */
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0d1226, 0.022);
+const settingsToggle = document.getElementById('settingsToggle');
+const settingsPanel  = document.getElementById('settingsPanel');
+const gainRange      = document.getElementById('gainRange');
+const thresholdRange = document.getElementById('thresholdRange');
+const durationRange  = document.getElementById('durationRange');
+const sleepRange     = document.getElementById('sleepRange');
+const volumeRange    = document.getElementById('volumeRange');
+const gainVal      = document.getElementById('gainVal');
+const thresholdVal = document.getElementById('thresholdVal');
+const durationVal  = document.getElementById('durationVal');
+const sleepVal     = document.getElementById('sleepVal');
+const volumeVal    = document.getElementById('volumeVal');
 
-const camera = new THREE.PerspectiveCamera(
-    38,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
-);
-camera.position.set(0, 0.4, 11.5);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-sceneContainer.appendChild(renderer.domElement);
-
-/* ============================================================
-   СВЕТ
-============================================================ */
-const ambient = new THREE.HemisphereLight(0xaec8ff, 0x17152b, 2.0);
-scene.add(ambient);
-
-const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
-keyLight.position.set(-5, 8, 8);
-keyLight.castShadow = true;
-keyLight.shadow.mapSize.width = 1024;
-keyLight.shadow.mapSize.height = 1024;
-scene.add(keyLight);
-
-const rimLight = new THREE.PointLight(0x7b8cff, 14, 20);
-rimLight.position.set(5, 3, -3);
-scene.add(rimLight);
-
-const redLight = new THREE.PointLight(0xff3030, 0, 14);
-redLight.position.set(0, 2, 5);
-scene.add(redLight);
-
-/* ============================================================
-   МОНСТР
-============================================================ */
-const monster = new THREE.Group();
-monster.position.y = -0.3;
-scene.add(monster);
-
-/* --- материалы --- */
-const bodyMat  = new THREE.MeshStandardMaterial({ color: 0x55c85a, roughness: 0.55, metalness: 0.05 });
-const bellyMat = new THREE.MeshStandardMaterial({ color: 0x91e987, roughness: 0.7 });
-const hornMat  = new THREE.MeshStandardMaterial({ color: 0x6637b8, roughness: 0.4, metalness: 0.15 });
-const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
-const pupilMat = new THREE.MeshStandardMaterial({ color: 0x050509, roughness: 0.25 });
-const mouthMat = new THREE.MeshStandardMaterial({ color: 0x260710, roughness: 0.75 });
-const toothMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
-const browMat  = new THREE.MeshStandardMaterial({ color: 0x2a1010, roughness: 0.8 });
-const spotMat  = new THREE.MeshStandardMaterial({ color: 0x2f963f, roughness: 0.85 });
-
-/* --- тело --- */
-const body = new THREE.Mesh(new THREE.SphereGeometry(2.8, 64, 48), bodyMat);
-body.scale.set(1, 1.12, 0.85);
-body.position.y = -0.2;
-body.castShadow = true;
-body.receiveShadow = true;
-monster.add(body);
-
-/* --- живот --- */
-const belly = new THREE.Mesh(new THREE.SphereGeometry(1.9, 48, 32), bellyMat);
-belly.scale.set(1, 1.05, 0.3);
-belly.position.set(0, -0.7, 2.1);
-belly.castShadow = true;
-monster.add(belly);
-
-/* --- рога --- */
-function createHorn(x, rot) {
-    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.8, 32), hornMat);
-    horn.position.set(x, 2.2, 0.1);
-    horn.rotation.z = rot;
-    horn.castShadow = true;
-    monster.add(horn);
-    return horn;
-}
-const leftHorn  = createHorn(-1.7, -0.42);
-const rightHorn = createHorn( 1.7,  0.42);
-
-/* --- глаза --- */
-const eyes = [];
-
-function createEye(x) {
-    const g = new THREE.Group();
-    g.position.set(x, 0.7, 2.35);
-
-    const white = new THREE.Mesh(new THREE.SphereGeometry(0.7, 40, 32), eyeWhiteMat);
-    white.scale.z = 0.5;
-    white.castShadow = true;
-    g.add(white);
-
-    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 24), pupilMat);
-    pupil.position.z = 0.55;
-    g.add(pupil);
-
-    const highlight = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), eyeWhiteMat);
-    highlight.position.set(-0.1, 0.15, 0.8);
-    g.add(highlight);
-
-    // Веко — полусфера сверху, при сне опускается
-    const eyelid = new THREE.Mesh(
-        new THREE.SphereGeometry(0.72, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
-        bodyMat
-    );
-    eyelid.position.z = 0.02;
-    eyelid.rotation.x = -Math.PI / 2;
-    eyelid.scale.set(1, 1, 1);
-    g.add(eyelid);
-
-    monster.add(g);
-    return { group: g, pupil, eyelid, white, baseY: 0.7 };
-}
-
-const leftEye  = createEye(-0.8);
-const rightEye = createEye( 0.8);
-
-/* --- брови --- */
-const leftBrow = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.16, 0.12), browMat);
-leftBrow.position.set(-0.8, 1.35, 2.5);
-leftBrow.rotation.z = 0.25;
-leftBrow.visible = false;
-monster.add(leftBrow);
-
-const rightBrow = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.16, 0.12), browMat);
-rightBrow.position.set(0.8, 1.35, 2.5);
-rightBrow.rotation.z = -0.25;
-rightBrow.visible = false;
-monster.add(rightBrow);
-
-/* --- рот --- */
-const mouth = new THREE.Mesh(new THREE.SphereGeometry(1.1, 48, 32), mouthMat);
-mouth.scale.set(1, 0.3, 0.3);
-mouth.position.set(0, -0.9, 2.45);
-monster.add(mouth);
-
-/* --- зубы --- */
-const teeth = [];
-for (let i = 0; i < 5; i++) {
-    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.42, 16), toothMat);
-    tooth.position.set(-0.5 + i * 0.25, -0.65, 2.7);
-    tooth.rotation.z = Math.PI;
-    tooth.visible = false;
-    monster.add(tooth);
-    teeth.push(tooth);
-}
-
-/* --- лапы / руки --- */
-function createLimb(x, y, z, sx, sy, sz, rot) {
-    const limb = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 24), bodyMat);
-    limb.scale.set(sx, sy, sz);
-    limb.position.set(x, y, z);
-    limb.rotation.z = rot;
-    limb.castShadow = true;
-    monster.add(limb);
-    return limb;
-}
-
-const leftArm  = createLimb(-2.75, -0.3, 0.2, 0.65, 1.4, 0.65, -0.5);
-const rightArm = createLimb( 2.75, -0.3, 0.2, 0.65, 1.4, 0.65,  0.5);
-
-const leftFoot = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 24), bodyMat);
-leftFoot.scale.set(1.3, 0.6, 1.5);
-leftFoot.position.set(-1.2, -3.2, 0.6);
-leftFoot.castShadow = true;
-monster.add(leftFoot);
-
-const rightFoot = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 24), bodyMat);
-rightFoot.scale.set(1.3, 0.6, 1.5);
-rightFoot.position.set(1.2, -3.2, 0.6);
-rightFoot.castShadow = true;
-monster.add(rightFoot);
-
-/* --- пятнышки --- */
-for (let i = 0; i < 10; i++) {
-    const spot = new THREE.Mesh(
-        new THREE.SphereGeometry(0.15 + Math.random() * 0.2, 16, 16),
-        spotMat
-    );
-    const angle = Math.random() * Math.PI * 2;
-    const r = 1.6 + Math.random() * 0.8;
-    spot.position.set(
-        Math.cos(angle) * r,
-        -1 + Math.random() * 2.2,
-        1.9 + Math.random() * 0.4
-    );
-    monster.add(spot);
-}
-
-/* ============================================================
-   СОСТОЯНИЕ
-============================================================ */
-let monsterState = 'sleeping'; // sleeping | warning | awake
-let targetScale  = 1;
-let elapsed      = 0;
-let eyeOpen      = 0;      // 0 — закрыт, 1 — открыт
-let growlActive  = false;
-let wakeCount    = 0;
-let quietSeconds = 0;
-let lastQuietTick = 0;
-
-/* ============================================================
-   ЗВУК РЫКА
-============================================================ */
-let roarAudio = new Audio('roar.mp3');
-roarAudio.preload = 'auto';
-roarAudio.volume  = 0.7;
-let roarPlaying = false;
-
-function playRoar() {
-    if (roarPlaying) return;
-    roarPlaying = true;
-    try {
-        roarAudio.currentTime = 0;
-        roarAudio.volume = settings.volume;
-        const p = roarAudio.play();
-        if (p && p.catch) p.catch(e => console.warn('Рык не проигрался:', e));
-    } catch (e) {
-        console.warn('Рык не проигрался:', e);
-    }
-    // Файл ~13 сек, играет целиком
-    roarAudio.onended = () => {
-        roarPlaying = false;
-        roarAudio.onended = null;
-    };
-}
-
-/* ============================================================
-   НАСТРОЙКИ
-============================================================ */
 const settings = {
-    gain: 8,           // усиление микрофона
-    threshold: 0.05,   // порог 0..1
-    wakeDelay: 2000,   // мс шума, чтобы проснуться
-    sleepDelay: 8000,  // мс тишины, чтобы заснуть
-    volume: 0.7        // громкость рыка
+  gain: 10,
+  threshold: 0.05,
+  duration: 600,
+  sleepDelay: 8000,
+  volume: 0.7,
+  noiseFloor: 0
 };
 
-settingsBtn.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+let audioCtx, analyser, dataArray, source, gainNode;
+let isAwake = false;
+let noiseStartTime = null;
+let lastLoudTime = 0;
+let animationId;
+let isEating = false;
+let isCalibrating = false;
 
-gainSlider.addEventListener('input', () => {
-    settings.gain = +gainSlider.value;
-    gainVal.textContent = settings.gain + 'x';
-    if (gainNode) gainNode.gain.value = settings.gain;
-});
+/* ============================================================
+   РЫК ИЗ ФАЙЛА
+   ============================================================ */
+const roarAudio = new Audio('roar.mp3');
+roarAudio.preload = 'auto';
+roarAudio.volume = settings.volume;
+let roarPlaying = false;
 
-sensSlider.addEventListener('input', () => {
-    settings.threshold = +sensSlider.value / 100;
-    sensVal.textContent = sensSlider.value;
-    updateThresholdMarker();
-});
-
-wakeSlider.addEventListener('input', () => {
-    settings.wakeDelay = +wakeSlider.value * 1000;
-    wakeVal.textContent = wakeSlider.value + ' сек';
-});
-
-sleepSlider.addEventListener('input', () => {
-    settings.sleepDelay = +sleepSlider.value * 1000;
-    sleepVal.textContent = sleepSlider.value + ' сек';
-});
-
-volumeSlider.addEventListener('input', () => {
-    settings.volume = +volumeSlider.value / 100;
-    volumeVal.textContent = volumeSlider.value;
+function playGrowl() {
+  if (settings.volume === 0) return;
+  if (roarPlaying) return;
+  roarPlaying = true;
+  try {
+    roarAudio.currentTime = 0;
     roarAudio.volume = settings.volume;
+    const p = roarAudio.play();
+    if (p && p.catch) p.catch(e => console.warn('Не удалось проиграть рык:', e));
+  } catch (e) {
+    console.warn('Не удалось проиграть рык:', e);
+  }
+  // Файл ~13 сек, играет полностью
+  roarAudio.onended = () => {
+    roarPlaying = false;
+    roarAudio.onended = null;
+  };
+}
+
+function stopGrowl() {
+  try {
+    roarAudio.pause();
+    roarAudio.currentTime = 0;
+  } catch (e) {}
+  roarPlaying = false;
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+settingsToggle.addEventListener('click', () => settingsPanel.classList.toggle('open'));
+
+gainRange.addEventListener('input', () => {
+  const v = +gainRange.value;
+  settings.gain = v;
+  gainVal.textContent = v + 'x';
+  if (gainNode) gainNode.gain.value = v;
+});
+
+thresholdRange.addEventListener('input', () => {
+  const v = +thresholdRange.value;
+  settings.threshold = v / 100;
+  thresholdVal.textContent = v;
+  updateThresholdMarker();
+});
+
+durationRange.addEventListener('input', () => {
+  const v = +durationRange.value;
+  settings.duration = v * 100;
+  durationVal.textContent = (v / 10).toFixed(1) + ' с';
+});
+
+sleepRange.addEventListener('input', () => {
+  const v = +sleepRange.value;
+  settings.sleepDelay = v * 1000;
+  sleepVal.textContent = v + ' с';
+});
+
+volumeRange.addEventListener('input', () => {
+  const v = +volumeRange.value;
+  settings.volume = v / 100;
+  volumeVal.textContent = v;
+  roarAudio.volume = settings.volume;
 });
 
 function updateThresholdMarker() {
-    const pos = Math.min(settings.threshold * 4, 1) * 100;
-    thresholdEl.style.left = pos + '%';
+  const pos = Math.min(settings.threshold * 4, 1) * 100;
+  meterThreshold.style.left = pos + '%';
 }
 updateThresholdMarker();
 
 /* ============================================================
-   МИКРОФОН
-============================================================ */
-let audioCtx, analyser, dataArray, micSource, gainNode;
-let noiseFloor = 0;
-let audioReady = false;
-let noiseStartTime = null;
-let lastLoudTime = 0;
-let rafId = null;
+   СТАРТ
+   ============================================================ */
+startBtn.addEventListener('click', async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
 
-startButton.addEventListener('click', async () => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: false,
-                noiseSuppression: false,
-                autoGainControl: false
-            }
-        });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    await audioCtx.resume();
 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        await audioCtx.resume();
+    source   = audioCtx.createMediaStreamSource(stream);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = settings.gain;
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.5;
 
-        micSource = audioCtx.createMediaStreamSource(stream);
+    source.connect(gainNode).connect(analyser);
+    dataArray = new Uint8Array(analyser.fftSize);
 
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = settings.gain;
+    startScreen.classList.add('hidden');
+    mainScreen.classList.remove('hidden');
+    spawnCookie();
 
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 1024;
-        analyser.smoothingTimeConstant = 0.4;
+    // Автокалибровка 1 сек
+    isCalibrating = true;
+    statusEl.textContent = '🎤 Слушаю тишину… (не шумите)';
+    let samples = [];
+    const calStart = Date.now();
+    const calInterval = setInterval(() => {
+      analyser.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      samples.push(Math.sqrt(sum / dataArray.length));
 
-        micSource.connect(gainNode).connect(analyser);
-        dataArray = new Uint8Array(analyser.fftSize);
-
-        startScreen.classList.add('hidden');
-        statusTitle.textContent = '🎤 Калибровка...';
-        statusDesc.textContent  = 'Секунду, монстрик прислушивается к тишине';
-
-        // Калибровка 2 секунды
-        const samples = [];
-        const calStart = performance.now();
-        await new Promise(resolve => {
-            const calInterval = setInterval(() => {
-                analyser.getByteTimeDomainData(dataArray);
-                let sum = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    const v = (dataArray[i] - 128) / 128;
-                    sum += v * v;
-                }
-                samples.push(Math.sqrt(sum / dataArray.length));
-                if (performance.now() - calStart > 2000) {
-                    clearInterval(calInterval);
-                    resolve();
-                }
-            }, 50);
-        });
-
+      if (Date.now() - calStart > 1000) {
+        clearInterval(calInterval);
         samples.sort((a, b) => a - b);
         const p80 = samples[Math.floor(samples.length * 0.8)] || 0;
-        noiseFloor = Math.max(p80 * 1.5, 0.015);
-
-        audioReady = true;
-        statusTitle.textContent = '😴 Монстрик спит';
-        statusDesc.textContent  = 'Сохраняйте тишину, чтобы он не проснулся';
-
-        cookieEl.classList.remove('hidden');
-        positionCookie();
-
-        requestAnimationFrame(loop);
-    } catch (e) {
-        alert('Нужен доступ к микрофону!\n\n' + e.message);
-    }
+        settings.noiseFloor = p80 * 1.5;
+        calibBadge.textContent = 'фон ' + (p80 * 100).toFixed(1);
+        isCalibrating = false;
+        statusEl.textContent = '😴 Тихо… монстрик спит';
+        listenLoop();
+      }
+    }, 50);
+  } catch (err) {
+    alert('Не удалось получить доступ к микрофону.\n\n' + err.message);
+  }
 });
 
 /* ============================================================
    ОСНОВНОЙ ЦИКЛ
-============================================================ */
-let lastTime = performance.now();
+   ============================================================ */
+function listenLoop() {
+  analyser.getByteTimeDomainData(dataArray);
 
-function loop(now) {
-    rafId = requestAnimationFrame(loop);
+  let sum = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    const v = (dataArray[i] - 128) / 128;
+    sum += v * v;
+  }
+  const rms = Math.sqrt(sum / dataArray.length);
 
-    const delta = Math.min(0.05, (now - lastTime) / 1000);
-    lastTime = now;
-    elapsed += delta;
+  const effectiveThreshold = Math.max(settings.threshold, settings.noiseFloor);
 
-    // === Анализ звука ===
-    let noise = 0;
-    if (audioReady) {
-        analyser.getByteTimeDomainData(dataArray);
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-            const v = (dataArray[i] - 128) / 128;
-            sum += v * v;
-        }
-        const rms = Math.sqrt(sum / dataArray.length);
-        const effectiveThreshold = Math.max(settings.threshold, noiseFloor);
-        let level = Math.max(0, rms - effectiveThreshold) * 8;
-        noise = Math.min(1, level);
+  const displayLevel = Math.min(rms * 4, 1);
+  meterFill.style.width = (displayLevel * 100) + '%';
 
-        // UI шкалы
-        meterFill.style.width = (noise * 100) + '%';
-        if (noise < 0.15)      noiseLevel.textContent = '🤫 Тихо';
-        else if (noise < 0.45) noiseLevel.textContent = '🙂 Нормально';
-        else if (noise < 0.7)  noiseLevel.textContent = '😮 Громко';
-        else                   noiseLevel.textContent = '😡 Слишком громко';
+  const now = Date.now();
 
-        updateMonsterLogic(noise, now);
-    }
-
-    // === Анимация монстра ===
-    animateMonster(delta, now);
-
-    // === Таймер тишины ===
-    if (monsterState === 'sleeping') {
-        quietSeconds += delta;
-        const m = Math.floor(quietSeconds / 60);
-        const s = Math.floor(quietSeconds % 60);
-        starsCountEl.textContent = m + ':' + String(s).padStart(2, '0');
-    }
-
-    // === Камера ===
-    camera.position.x = Math.sin(now * 0.0003) * 0.12;
-    camera.position.y = 0.4 + Math.sin(now * 0.0004) * 0.05;
-    camera.lookAt(0, -0.2, 0);
-
-    renderer.render(scene, camera);
-}
-
-/* ============================================================
-   ЛОГИКА ПРОБУЖДЕНИЯ
-============================================================ */
-function updateMonsterLogic(noise, now) {
-    const loud = noise > 0.4;
-
-    if (loud) {
-        if (noiseStartTime === null) noiseStartTime = now;
-        const duration = now - noiseStartTime;
-
-        if (duration >= settings.wakeDelay) {
-            wakeMonster();
-        } else if (monsterState === 'sleeping') {
-            setWarning();
-        }
-        lastLoudTime = now;
+  if (!isEating) {
+    if (rms > effectiveThreshold) {
+      lastLoudTime = now;
+      if (noiseStartTime === null) noiseStartTime = now;
+      if (!isAwake && (now - noiseStartTime) >= settings.duration) wakeUp();
     } else {
-        if (noiseStartTime !== null && now - lastLoudTime > 300) {
-            noiseStartTime = null;
-        }
-
-        if (monsterState === 'awake' && now - lastLoudTime > settings.sleepDelay) {
-            calmAndSleep();
-        } else if (monsterState === 'warning' && now - lastLoudTime > 1500) {
-            sleepMonster();
-        }
+      if (noiseStartTime !== null && now - lastLoudTime > 250) noiseStartTime = null;
+      if (isAwake && now - lastLoudTime > settings.sleepDelay) goToSleep();
     }
+  }
+
+  animationId = requestAnimationFrame(listenLoop);
 }
 
-function setWarning() {
-    if (monsterState === 'warning' || monsterState === 'awake') return;
-    monsterState = 'warning';
-    app.classList.add('warning');
-    app.classList.remove('awake');
-    redLight.intensity = 2;
-    statusTitle.textContent = '😮 Кажется, становится громко...';
-    statusDesc.textContent  = 'Монстрик начинает просыпаться';
-    targetScale = 1.03;
-    // Приоткрываем глаза
-    animateEyelids(0.35);
-    // Подсветить печеньку
-    cookieEl.classList.add('hint');
+function wakeUp() {
+  isAwake = true;
+  monsterEl.classList.add('awake');
+  document.body.classList.add('awake');
+  statusEl.classList.add('awake');
+  statusEl.textContent = '😡 Тихо! Монстрик проснулся!';
+  playGrowl();
 }
 
-function wakeMonster() {
-    if (monsterState === 'awake') return;
-    monsterState = 'awake';
-    app.classList.remove('warning');
-    app.classList.add('awake');
-    redLight.intensity = 9;
-    targetScale = 1.08;
-    statusTitle.textContent = '😡 ОЙ! МОНСТРИК ПРОСНУЛСЯ!';
-    statusDesc.textContent  = 'Сделайте тихо или дайте ему печеньку 🍪';
-
-    wakeCount++;
-    wakeCountEl.textContent = wakeCount;
-
-    animateEyelids(1);
-    playRoar();
-
-    // Подсветить печеньку — надо дать её
-    cookieEl.classList.add('hint');
-    startCookiePulse();
-}
-
-function sleepMonster() {
-    monsterState = 'sleeping';
-    app.classList.remove('warning', 'awake');
-    redLight.intensity = 0;
-    targetScale = 1;
-    statusTitle.textContent = '😴 Монстрик снова спит';
-    statusDesc.textContent  = 'Отлично! Продолжаем сохранять тишину';
-    animateEyelids(0);
-    cookieEl.classList.remove('hint');
-    stopCookiePulse();
-}
-
-function calmAndSleep() {
-    if (monsterState === 'awake') {
-        monsterState = 'warning';
-        app.classList.remove('awake');
-        app.classList.add('warning');
-        redLight.intensity = 3;
-        statusTitle.textContent = '😮 Монстрик успокаивается...';
-        statusDesc.textContent  = 'Ещё немного тишины, и он уснёт';
-        targetScale = 1.03;
-        animateEyelids(0.4);
-    } else {
-        sleepMonster();
-    }
-}
-
-/* ============================================================
-   АНИМАЦИЯ ГЛАЗ / ВЕК
-============================================================ */
-function animateEyelids(openAmount) {
-    eyeOpen = openAmount;
-}
-
-/* ============================================================
-   АНИМАЦИЯ МОНСТРА
-============================================================ */
-function animateMonster(delta, now) {
-    // Дыхание
-    const breatheSpeed = monsterState === 'sleeping' ? 1.5 : 4;
-    const breatheAmp   = monsterState === 'sleeping' ? 0.03 : 0.015;
-    const breathing = 1 + Math.sin(elapsed * breatheSpeed) * breatheAmp;
-
-    monster.scale.set(
-        targetScale * breathing,
-        targetScale * breathing,
-        targetScale * breathing
-    );
-
-    // Позиция / тряска
-    if (monsterState === 'sleeping') {
-        monster.position.y = -0.3 + Math.sin(elapsed * 1.2) * 0.15;
-        monster.rotation.z = Math.sin(elapsed * 0.6) * 0.015;
-        monster.rotation.x = 0;
-    } else if (monsterState === 'warning') {
-        monster.position.y = -0.25 + Math.sin(elapsed * 6) * 0.06;
-        monster.rotation.z = Math.sin(elapsed * 8) * 0.025;
-        monster.rotation.x = 0;
-    } else if (monsterState === 'awake') {
-        monster.position.y = -0.3 + Math.sin(elapsed * 25) * 0.08;
-        monster.rotation.z = Math.sin(elapsed * 22) * 0.08;
-        monster.rotation.x = Math.sin(elapsed * 19) * 0.03;
-    }
-
-    // ==== ГЛАЗА ====
-    // Плавное открытие/закрытие
-    leftEye.white.scale.y  += (eyeOpen - leftEye.white.scale.y) * 0.15;
-    rightEye.white.scale.y += (eyeOpen - rightEye.white.scale.y) * 0.15;
-
-    // Веко: сдвигаем вверх при открытии
-    const lidOffset = (1 - eyeOpen) * 0.75; // 0.75 — полностью закрывает
-    leftEye.eyelid.position.y  = lidOffset;
-    rightEye.eyelid.position.y = lidOffset;
-
-    leftEye.pupil.visible  = eyeOpen > 0.3;
-    rightEye.pupil.visible = eyeOpen > 0.3;
-
-    // Зрачок двигается
-    const pupilX = Math.sin(elapsed * 0.8) * 0.15;
-    const pupilY = eyeOpen > 0.6 ? 0 : -0.1;
-    leftEye.pupil.position.x = pupilX;
-    rightEye.pupil.position.x = pupilX;
-    leftEye.pupil.position.y = pupilY;
-    rightEye.pupil.position.y = pupilY;
-
-    // Зрачок сужается при злости
-    const pupilScale = monsterState === 'awake' ? 0.6 : 1;
-    leftEye.pupil.scale.setScalar(pupilScale);
-    rightEye.pupil.scale.setScalar(pupilScale);
-
-    // ==== БРОВИ ====
-    const browTargetVisible = monsterState === 'awake';
-    leftBrow.visible  = browTargetVisible;
-    rightBrow.visible = browTargetVisible;
-    if (browTargetVisible) {
-        leftBrow.position.y  = 1.35 + Math.sin(elapsed * 15) * 0.05;
-        rightBrow.position.y = 1.35 + Math.sin(elapsed * 15 + 1) * 0.05;
-    }
-
-    // ==== РОТ И ЗУБЫ ====
-    teeth.forEach(t => t.visible = monsterState === 'awake');
-
-    if (monsterState === 'awake') {
-        mouth.scale.set(1.25, 0.55, 0.35);
-        mouth.position.y = -0.95;
-    } else {
-        mouth.scale.set(1, 0.3, 0.3);
-        mouth.position.y = -0.9;
-    }
-
-    // ==== РОГА ====
-    const hornShake = monsterState === 'awake' ? Math.sin(elapsed * 15) * 0.1 : 0;
-    leftHorn.rotation.z  = -0.42 - hornShake;
-    rightHorn.rotation.z =  0.42 + hornShake;
-
-    // ==== ЦВЕТ ТЕЛА ====
-    if (monsterState === 'awake') {
-        bodyMat.color.lerp(new THREE.Color(0xd43a3a), 0.08);
-        bellyMat.color.lerp(new THREE.Color(0xff9090), 0.08);
-        hornMat.color.lerp(new THREE.Color(0x8e0000), 0.08);
-        leftArm.material  = bodyMat;
-        rightArm.material = bodyMat;
-    } else if (monsterState === 'warning') {
-        bodyMat.color.lerp(new THREE.Color(0x9bc85a), 0.05);
-        bellyMat.color.lerp(new THREE.Color(0xc8e987), 0.05);
-        hornMat.color.lerp(new THREE.Color(0x8855cc), 0.05);
-    } else {
-        bodyMat.color.lerp(new THREE.Color(0x55c85a), 0.05);
-        bellyMat.color.lerp(new THREE.Color(0x91e987), 0.05);
-        hornMat.color.lerp(new THREE.Color(0x6637b8), 0.05);
-    }
-
-    // Красный свет
-    if (monsterState === 'awake') {
-        redLight.intensity = 8 + Math.sin(elapsed * 12) * 2;
-    } else if (monsterState === 'warning') {
-        redLight.intensity = 2 + Math.sin(elapsed * 6) * 0.6;
-    } else {
-        redLight.intensity *= 0.95;
-    }
+function goToSleep() {
+  isAwake = false;
+  monsterEl.classList.remove('awake');
+  document.body.classList.remove('awake');
+  statusEl.classList.remove('awake');
+  statusEl.textContent = '😴 Тихо… монстрик спит';
+  stopGrowl();
 }
 
 /* ============================================================
    ПЕЧЕНЬКА
-============================================================ */
-let draggingCookie = false;
-let cookieOffsetX = 0;
-let cookieOffsetY = 0;
+   ============================================================ */
+function spawnCookie() {
+  cookieEl.classList.remove('hidden');
+  cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+  cookieEl.style.top  = (window.innerHeight - 150) + 'px';
 
-function positionCookie() {
-    cookieEl.style.left = (window.innerWidth - 130) + 'px';
-    cookieEl.style.top  = (window.innerHeight - 200) + 'px';
-}
+  let dragging = false, offsetX = 0, offsetY = 0;
 
-function startCookiePulse() {
-    cookieEl.classList.add('hint');
-}
-
-function stopCookiePulse() {
-    cookieEl.classList.remove('hint');
-}
-
-cookieEl.addEventListener('pointerdown', (e) => {
-    if (monsterState === 'sleeping') return; // спящему не мешаем
-    draggingCookie = true;
-    cookieEl.classList.add('dragging');
-    cookieEl.classList.remove('hint');
-    const rect = cookieEl.getBoundingClientRect();
-    cookieOffsetX = e.clientX - rect.left;
-    cookieOffsetY = e.clientY - rect.top;
+  cookieEl.addEventListener('pointerdown', (e) => {
+    if (isEating) return;
+    dragging = true;
+    cookieEl.style.animation = 'none';
+    const r = cookieEl.getBoundingClientRect();
+    offsetX = e.clientX - r.left;
+    offsetY = e.clientY - r.top;
     cookieEl.setPointerCapture(e.pointerId);
-    e.preventDefault();
-});
+  });
 
-cookieEl.addEventListener('pointermove', (e) => {
-    if (!draggingCookie) return;
-    cookieEl.style.left = (e.clientX - cookieOffsetX) + 'px';
-    cookieEl.style.top  = (e.clientY - cookieOffsetY) + 'px';
-});
+  cookieEl.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    cookieEl.style.left = (e.clientX - offsetX) + 'px';
+    cookieEl.style.top  = (e.clientY - offsetY) + 'px';
+  });
 
-cookieEl.addEventListener('pointerup', (e) => {
-    if (!draggingCookie) return;
-    draggingCookie = false;
-    cookieEl.classList.remove('dragging');
-
-    const c = cookieEl.getBoundingClientRect();
-    const cx = c.left + c.width / 2;
-    const cy = c.top + c.height / 2;
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const dist = Math.sqrt((cx - centerX) ** 2 + (cy - centerY) ** 2);
-
-    if (dist < 280) {
-        feedMonster();
-    } else {
-        positionCookie();
-    }
-});
+  cookieEl.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    const cR = cookieEl.getBoundingClientRect();
+    const mR = monsterEl.getBoundingClientRect();
+    const overlap =
+      cR.left < mR.right && cR.right > mR.left &&
+      cR.top < mR.bottom && cR.bottom > mR.top;
+    if (overlap) feedMonster();
+    else cookieEl.style.animation = '';
+  });
+}
 
 function feedMonster() {
-    if (monsterState === 'sleeping') return;
+  if (isEating) return;
+  isEating = true;
 
-    // Анимация полёта печеньки
-    const targetX = window.innerWidth / 2 - 50;
-    const targetY = window.innerHeight / 2 - 50;
+  const mR = monsterEl.getBoundingClientRect();
+  const targetX = mR.left + mR.width / 2 - 55;
+  const targetY = mR.top + mR.height / 2 - 55;
 
-    cookieEl.style.transition = 'all .5s cubic-bezier(.4,0,.2,1)';
-    cookieEl.style.left = targetX + 'px';
-    cookieEl.style.top  = targetY + 'px';
-    cookieEl.style.transform = 'scale(.3) rotate(720deg)';
+  cookieEl.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+  cookieEl.style.left = targetX + 'px';
+  cookieEl.style.top  = targetY + 'px';
+  cookieEl.style.transform = 'scale(0.4) rotate(360deg)';
+
+  setTimeout(() => {
+    cookieEl.classList.add('hidden');
+    cookieEl.style.transition = '';
+    cookieEl.style.transform  = '';
+    showYum(targetX + 55, targetY);
+    spawnCrumbs(targetX + 55, targetY + 30);
+
+    isAwake = false;
+    monsterEl.classList.remove('awake');
+    document.body.classList.remove('awake');
+    statusEl.classList.remove('awake');
+    statusEl.textContent = '🍪 Ням-ням… монстрик доволен!';
+    stopGrowl();
 
     setTimeout(() => {
-        cookieEl.style.transition = '';
-        cookieEl.style.transform = '';
-        cookieEl.classList.add('hidden');
-
-        showYum(targetX + 50, targetY);
-        spawnCrumbs(targetX + 50, targetY + 30);
-
-        // Мгновенно успокаиваем
-        stopRoar();
-        calmAndSleep();
-        statusTitle.textContent = '🍪 Ням-ням!';
-        statusDesc.textContent  = 'Монстрик съел печеньку и стал добрее';
-        eyeOpen = 0.3;
-
-        setTimeout(() => {
-            sleepMonster();
-            cookieEl.classList.remove('hidden');
-            positionCookie();
-        }, 1800);
-    }, 550);
-}
-
-function stopRoar() {
-    try {
-        roarAudio.pause();
-        roarAudio.currentTime = 0;
-    } catch (e) {}
-    roarPlaying = false;
+      statusEl.textContent = '😴 Тихо… монстрик спит';
+      isEating = false;
+      setTimeout(() => {
+        cookieEl.classList.remove('hidden');
+        cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+        cookieEl.style.top  = (window.innerHeight - 150) + 'px';
+        cookieEl.style.animation = '';
+      }, 1500);
+    }, 1800);
+  }, 550);
 }
 
 function showYum(x, y) {
-    const texts = ['Ням!', 'Мням-мням!', 'Вкусно!', 'Хрум!', 'Спасибо!'];
-    const el = document.createElement('div');
-    el.className = 'yum';
-    el.textContent = texts[Math.floor(Math.random() * texts.length)];
-    el.style.left = x + 'px';
-    el.style.top  = y + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1800);
+  const texts = ['Ням!', 'Мням-мням!', 'Вкусно!', 'Хрум!'];
+  const el = document.createElement('div');
+  el.className = 'yum';
+  el.textContent = texts[Math.floor(Math.random() * texts.length)];
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
 }
 
 function spawnCrumbs(x, y) {
-    for (let i = 0; i < 14; i++) {
-        const c = document.createElement('div');
-        c.className = 'crumb';
-        c.style.left = x + 'px';
-        c.style.top  = y + 'px';
-        document.body.appendChild(c);
-
-        const angle = Math.random() * Math.PI * 2;
-        const dist  = 50 + Math.random() * 100;
-        const dx = Math.cos(angle) * dist;
-        const dy = Math.sin(angle) * dist + 50;
-
-        c.animate([
-            { transform: 'translate(0,0) scale(1)', opacity: 1 },
-            { transform: `translate(${dx}px, ${dy}px) scale(.3)`, opacity: 0 }
-        ], {
-            duration: 900 + Math.random() * 500,
-            easing: 'cubic-bezier(.3,0,.7,1)',
-            fill: 'forwards'
-        });
-
-        setTimeout(() => c.remove(), 1500);
-    }
+  for (let i = 0; i < 12; i++) {
+    const c = document.createElement('div');
+    c.className = 'crumb';
+    c.style.left = x + 'px';
+    c.style.top  = y + 'px';
+    document.body.appendChild(c);
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 40 + Math.random() * 80;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist + 40;
+    c.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+    ], {
+      duration: 900 + Math.random() * 400,
+      easing: 'cubic-bezier(0.3, 0, 0.7, 1)',
+      fill: 'forwards'
+    });
+    setTimeout(() => c.remove(), 1400);
+  }
 }
 
-/* ============================================================
-   RESIZE
-============================================================ */
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    if (!draggingCookie && monsterState === 'sleeping') positionCookie();
+  if (cookieEl.classList.contains('hidden') || isEating) return;
+  cookieEl.style.left = (window.innerWidth / 2 - 55) + 'px';
+  cookieEl.style.top  = (window.innerHeight - 150) + 'px';
 });
 </script>
 </body>
