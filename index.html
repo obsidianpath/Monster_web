@@ -102,17 +102,33 @@
   .pupil-group { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .monster.awake .pupil-group { transform: translateY(6px) scale(0.55); }
 
- .eyelid-top,
+ /* === Веки === */
+  .eyelid-top,
   .eyelid-bottom {
-    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity   0.45s ease-out;
   }
 
-  .eyelid-top    { transform: translateY(0); }
-  .eyelid-bottom { transform: translateY(0); }
+  /* Сон: веки на месте, полностью видимы */
+  .eyelid-top    { transform: translateY(0);     opacity: 1; }
+  .eyelid-bottom { transform: translateY(0);     opacity: 1; }
 
-  /* Пробуждение: веки разъезжаются в стороны */
-  .monster.awake .eyelid-top    { transform: translateY(-180px); }
-  .monster.awake .eyelid-bottom { transform: translateY(180px);  }
+  /* Пробуждение: чуть разъезжаются и быстро растворяются */
+  .monster.awake .eyelid-top {
+    transform: translateY(-55px);
+    opacity: 0;
+    transition:
+      transform 0.5s cubic-bezier(0.4, 0, 0.6, 1),
+      opacity   0.35s ease-out;
+  }
+  .monster.awake .eyelid-bottom {
+    transform: translateY(55px);
+    opacity: 0;
+    transition:
+      transform 0.5s cubic-bezier(0.4, 0, 0.6, 1),
+      opacity   0.35s ease-out;
+  }
 
  
   .mouth-sleep { transition: opacity 0.4s ease; }
